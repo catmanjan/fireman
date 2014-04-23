@@ -1,23 +1,25 @@
 from rte import iptables
-import xmltodict, json
+import dicttoxml, json
 
-class RuleTranslator:
-        def __init__(self, rules=""):
-            self.rules = rules
+def execute(self, rules, format):
+    """ Execute the set of rules using the specified program
+        (Rule, str) -> None
+    """
+    if format == "iptables":
+        # convert to xml for iptables to translate
+        iptables.execute(translate("xml"))
+    else:
+        raise ValueError("Error: " + format + " is not yet supported")
 
-        def execute(self, format):
-            if format == "iptables":
-                iptables.execute(self.rules)
-            else:
-                raise ValueError("Error: " + format + " is not yet supported")
-
-        def translate(self, format):
-            if format == "json":
-                rules_dict = xmltodict.parse(self.rules)
-                return json.dumps(rules_dict)
-            elif format == "xml":
-                return self.rules
-            else:
-                raise ValueError("Error: " + format + " is not yet supported")
+def translate(self, rules format):
+    """ Translate the set of rules into a specified format
+        (Rule, str) -> None
+    """
+    if format == "json":
+        return json.dumps(rules.__dict__)
+    elif format == "xml":
+        return dicttoxml.parse(rules.__dict__)
+    else:
+        raise ValueError("Error: " + format + " is not yet supported")
 
 
