@@ -1,0 +1,23 @@
+<iptables-rules>
+  <table name="mangle">
+    <chain name="PREROUTING" policy="ACCEPT" packet-count="63436"
+byte-count="7137573">
+      <rule>
+       <conditions>
+        <match>
+          <p>tcp</p>
+        </match>
+        <tcp>
+          <sport>8443</sport>
+        </tcp>
+       </conditions>
+       <actions>
+        <call>
+          <check_ip/>
+        </call>
+        <ACCEPT/>
+       </actions>
+      </rule>
+    </chain>
+  </table>
+</iptables-rules>
