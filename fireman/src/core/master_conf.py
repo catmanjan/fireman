@@ -5,8 +5,12 @@ location of this file is hard-coded and expected to be set on install.
 The configuration file is parsed when this module is imported. It
 can be reparsed upon request.
 
-STATE: SKELETON
-TODO: everything
+STATE:complete/untested
+TODO:
+  set up some testing
+  provide borderline config cases
+  test
+  review considerations 
 CONSIDERATIONS:
   How to find the configuration file? Currently hard coded, should be
     set on install.
@@ -56,40 +60,67 @@ In this example
 import string
 
 __all__ = [
-    "get",
-    "set",
-    "reparse"
+    "Options"
 ]
 
-# Dictionary storing the options.
-# Internal.
-_options = {}
-_config_file = "/etc/fireman/master.conf"
-def get(key):
-    """Gets the value assigned to string:key. from the config file.
-       The whole config file is parsed. If no option called key
-       is present or the config file is poorly formed,  an exception is
-       raised.
-    """
-    # Don't catch the exception.
-    global _options
-    return _options[key] 
+class Options:
+    """This class forms the interface for this module.
 
-def set(key,value):
-    """If any line in the config file assigns a something to key, that
+       Usage is something like:
+         options = Options("/etc/fireman/master.conf")
+         options.get("services_folder")
+
+       Providing it as a class rather than a set of functions creates
+       a cleaner interface, especially when testing (as multiple config
+       files may be parsed during a testing session.
+    """
+    def __init__(self,filename):
+        """The object is initialised by giving it a file name to parse.
+           Throws:
+             IOError
+             SyntaxError
+        """
+        self.__filename = filename
+        self.__options = _parse_config(self.__filename)
+        self.__repr__ = self.__options.__repr__
+        self.__str__ = self.__options.__str__
+
+    def get(self,option):
+        """Get an option from the Options object.
+           E.g: if config file contains foo=bar, then get("foo")=="bar"
+           Throws:
+             KeyError
+        """
+        return self.__options[option]
+
+    def set(self,option,value):
+        """Sets an option in the Options object.
+           This results in both the object being updated, and the
+           underlying configuration file being updated to reflect
+           the action.
+           E.g: if the config file contains foo=bar, then
+           set("foo","foo") changes the line foo=bar to foo=foo.
+           If the config file does not contain foo=bar, then foo=foo is
+           appended to the file.
+        """
+        _set(self.filename,self.__options,option,value)
+
+
+def _set(filename,options,key,value):
+    """If any line in the filename assigns a something to key, that
        something is replaced by value.
        Otherwise, the line: key=value is appended to the config file.
        get(key) will return the new value, without reparsing the config
        file.
+       Also updates dictionary appropriately.
+       This is internal. Use Options.
     """
-    # Set the option in our in memory store.
-    global _options
-    global _config_file
-    _options[key] = value
+    # Set the option in our dictionary.
+    options[key] = value
     # We need to also set the option in the config file.
     lines = []
     found = False
-    config = open(_config_file,"r")
+    config = open(filename,"r")
     # Store file as a list of lines
     for line in config:
         # Parse the line.
@@ -161,15 +192,15 @@ def _evaluate_line(line):
         raise SyntaxError("Bad master config file syntax: "+line)
     return key,value
 
-def reparse():
-    """Reparses the config file, repopulating the store of options.
+def _parse_config(filename):
+    """Parses the config file at filename, returning a dictionary of
+       options. 
        If the config file is poorly formed, an exception is raised.
+       Internal function. See use Options.
     """
-    global _options
-    global _config_file
-    _options = {}
+    options = {}
     # Can raise exception. Don't catch it.
-    conf = open(_config_file,'r');
+    conf = open(filename,'r');
     # If an exception gets raise, catch it to close the file. Then reraise.
     for line in conf:
         try:
@@ -180,17 +211,15 @@ def reparse():
         # Did the line actually contain an option?
         if key:
             # Check for key duplicate.
-            if key in _options:
+            if key in options:
                 conf.close()
-                raise SyntaxError("Master config file has duplicate options")
-            _options[key] = value
+                raise SyntaxError("Master config file has duplicate options.")
+            options[key] = value
     conf.close()
-           
-# Do an initial parse.
-reparse()
+    return options
 
 # If main, then do some testing!
 if __name__ == "__main__":
     print "We test now."
     print "The parsed configuration file:"
-    print _options
+    print Options("/etc/fireman/master.conf") 
