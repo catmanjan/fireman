@@ -4,6 +4,8 @@
 # Main config file location will be set on installation.
 # This will contain the location of services config folder(s).
 #   (Probably /etc/fireman/services)
+# Add functions for adding/removing rules/services
+#   This part of the API needs a very thoughtful design.
 
 # import master_conf
 # import service_conf 
