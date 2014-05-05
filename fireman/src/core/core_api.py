@@ -23,8 +23,8 @@ import master_conf as options
 __all__ = [
     "get_lock",
     "release_lock",
+    "force_lock",
     "get_service_names",
-    "force_core",
     "start_service",
     "stop_service",
     "get_service_emitter",
@@ -44,6 +44,12 @@ _force=False;
 # Internal.
 _master_conf="/etc/fireman/master.conf"
 
+class LockedError(Exception):
+    """Thrown whenever a function that requires the core lock is called
+       if the core lock is not held, and forcing has not been enabled.
+    """
+    pass
+
 def get_lock():
     """Attempts to wait and hold the core lock file. This is probably
        /var/www/fireman/lock, but can be set in the master
@@ -55,6 +61,10 @@ def get_lock():
          IOError - error opening lock file or making directory
          ValueError - config file entry for lock_timeout not a number
          LockTimeoutError - system call timed out
+       Locking is enforced, but only superficially. The lock can be
+       forced open if the application wishes. The point of enforcing
+       the lock is to force API users to consider using the locking
+       functionality. 
     """
     global _lock_fd
     # Locking is only provided on posix environment.
@@ -95,9 +105,6 @@ def get_lock():
         else:
             raise e
  
-    
-
-
 def release_lock():
     """Releases hold on core lock file. Throws an exception if the lock
        isn't already held. The lock will be released afterwards
@@ -108,15 +115,26 @@ def release_lock():
            IOError - don't have lock
     """
     global _lock_fd
+    if not _lock_fd:
+        raise LockedError("You must get the lock before you release it.")
     if os.name != 'posix':
         raise EnvironmentError("File locking requires a posix environment.")
     if not _options:
         raise Exception("Set config file before calling other API functions.")
-    if not _lock_fd:
-        raise IOError("You must get the lock before you release it.")
     fcntl.flock(_lock_fd,fcntl.LOCK_UN)
     _lock_fd.close()
     _lock_fd = None
+
+def force_lock(force):
+    """Notifies the API that you wish to ignore the lock.
+       This is generally not recommended. If the lock is troubling you
+       then try to resolve it.
+       force
+         True - enable lock forcing
+         False - disable lock forcing 
+    """
+    global _force
+    _force = force
 
 def get_service_names():
     """Returns a list containing string representations of all
@@ -124,17 +142,11 @@ def get_service_names():
        stopped services). These names are fetched from service
        config files.
     """
+    global _lock_fd
+    global _force
+    if (not _lock_fd) and (not _force):
+        raise LockedError("Core is locked. Get the lock or force it.")
     pass 
-
-def force_core(mode):
-    """Initiates or deinitiates core force mode. In force mode the lock
-       file is ignored. This is not generally recommended. If a program
-       uses the lock incorrectly it may be necessary.
-       mode:
-         True - set to force.
-         False - remove force mode.
-    """
-    _force=mode;
 
 def start_service(service):
     """Adds all the rules associated with string:service using the
@@ -144,6 +156,10 @@ def start_service(service):
     # get all the rules associated with service from config file
     # remove them if they exist already, or check state of service
     # add rules to firewall
+    global _lock_fd
+    global _force
+    if (not _lock_fd) and (not _force):
+        raise LockedError("Core is locked. Get the lock or force it.")
     pass
 
 def stop_service(service):
@@ -153,6 +169,10 @@ def stop_service(service):
     """
     # get all the rules associated with service from config file
     # removes rules from firewall
+    global _lock_fd
+    global _force
+    if (not _lock_fd) and (not _force):
+        raise LockedError("Core is locked. Get the lock or force it.")
     pass
 
 def get_service_emitter():
@@ -165,12 +185,20 @@ def get_service_emitter():
        any data present on this file descriptor, grab the list of
        current services, then release the core lock.
     """
+    global _lock_fd
+    global _force
+    if (not _lock_fd) and (not _force):
+        raise LockedError("Core is locked. Get the lock or force it.")
     pass
 
 def refresh():
     """Clears all rules from firewall. Reparses configuration file to
        and reincludes all the rules.
     """
+    global _lock_fd
+    global _force
+    if (not _lock_fd) and (not _force):
+        raise LockedError("Core is locked. Get the lock or force it.")
     pass
 
 def generate_default_conf():
@@ -196,13 +224,22 @@ def generate_default_conf():
        recommended to edit the rules in place, as they will be
        destroyed if generate_default_conf() is called again.
     """
+    global _lock_fd
+    global _force
+    if (not _lock_fd) and (not _force):
+        raise LockedError("Core is locked. Get the lock or force it.")
     pass
 
 def set_master_config(filename):
     """Sets the core to use filename as its master configuration file.
+       This file is parsed and the options will be used by other core
+       functions.
        Throws - not guaranteed to be exhaustive:
            IOError - error opening file
            SyntaxError - config file syntax wrong
+       This function does NOT require the core lock. All it does is
+       parse a file. Also, the config defines the location of the lock
+       file.
     """
     global _options
     _options = options.Options(filename)
