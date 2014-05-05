@@ -1,14 +1,17 @@
-# Lots of this code is just stubs for now.
-# Many comments will be removed when the stubs are expanded.
-# Config parser will parse whatever format we use.
-# Main config file location will be set on installation.
-# This will contain the location of services config folder(s).
-#   (Probably /etc/fireman/services)
-# Add functions for adding/removing rules/services
-#   This part of the API needs a very thoughtful design.
+"""Implements an API for the core. The core does NOT run as a daemon,
+   so any state is stored in files.
 
-# import master_conf
-# import service_conf 
+   See fireman/doc/core_notes for some notes.
+
+   STATE:SKELETON
+   TODO:
+     Expand stubs.
+     Design API for adding/removing rules/services 
+   CONSIDERATIONS:see the notes
+"""
+
+# import master_conf - for interacting with options in the master config file
+# import service_conf - covers the implementation of rule/service storage
 
  __all__ = [
     "get_lock",

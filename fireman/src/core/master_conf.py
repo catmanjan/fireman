@@ -5,6 +5,13 @@ location of this file is hard-coded and expected to be set on install.
 The configuration file is parsed when this module is imported. It
 can be reparsed upon request.
 
+STATE: SKELETON
+TODO: everything
+CONSIDERATIONS:
+  Should I include functions to lock the configuration file? This can't
+  be done with the normal master lock, as the configuration file
+  defines that lock's location.
+
 Config file format - see en.wikipedia.org/wiki/Backus-Naur_Form
 <config_file> ::= null | <line> <config_file>
 <line> ::= <comment> newline | <option> newline | 
