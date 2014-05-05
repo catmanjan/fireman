@@ -9,11 +9,11 @@
      Design API for adding/removing rules/services 
    CONSIDERATIONS:see the notes
 """
-
+import master_conf as options
 # import master_conf - for interacting with options in the master config file
 # import service_conf - covers the implementation of rule/service storage
 
- __all__ = [
+__all__ = [
     "get_lock",
     "release_lock",
     "get_service_names",
@@ -22,7 +22,8 @@
     "stop_service",
     "get_service_emitter",
     "refresh",
-    "generate_default_conf"
+    "generate_default_conf",
+    "set_master_config"
 ]
 # if __name__ ==... run tests?
 
@@ -43,9 +44,9 @@ def get_lock():
        Throws:
     """
     lock_file = core_conf.get("lock_file");
-    if(!lock_file)
+    if not lock_file:
         pass# throw an exception
-    else 
+    else: 
         pass# use system call to open lock file. throw exception if applic
 
 def release_lock():
@@ -55,9 +56,9 @@ def release_lock():
        Throws:
     """
     lock_file = core_conf.get("lock_file");
-    if(!lock_file)
+    if not lock_file:
         pass# throw an exception
-    else
+    else:
         pass#use system call to unlock file
 
 def get_service_names():
@@ -140,4 +141,21 @@ def generate_default_conf():
     """
     pass
 
+def set_master_config(filename):
+    """Sets the core to use filename as its master configuration file.
+    """
+    global _options
+    _options = options.Options(filename)
+
+# Do some testing?
+if __name__ == "__main__":
+    print "We test core API."
+    config_filename = "/etc/fireman/master.conf"
+    try:
+        set_master_config(config_filename)
+    except IOError:
+        print("Couldn't open \""+config_filename+"\". Are you root? Does"+
+              " this file exist?")
+    print "Here is the config file:"
+    print _options
 

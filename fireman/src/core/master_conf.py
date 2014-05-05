@@ -20,12 +20,11 @@ Config file format - see en.wikipedia.org/wiki/Backus-Naur_Form
 <config_file> ::= null | <line> <config_file>
 <line> ::= <comment> newline | <option> newline
 <comment> ::= <whitespace> "#" any_string_not_containing_newline
-<option> ::=  <whitespace> <key> <whitespace> "=" <whitespace> <value>
+<option> ::=  <whitespace> <token> <whitespace> "=" <whitespace> <token>
               <whitespace>
 <whitespace> ::= space <whitespace> | tab <whitespace> | null
-<key> ::= letter | <key> letter
-<value> ::= letter | digit | other_char |  <key> letter | 
-            <key> number | <key> other_char
+<token> ::= letter | digit | other_char |  <token> letter | 
+            <token> number | <token> other_char
 
 The terminals:
   null is the empty string
@@ -172,21 +171,19 @@ def _evaluate_line(line):
         return "","" 
     # Split line: key=value -> (key,=,value)
     key,op,value = line.partition("=")
-    # Key must be all alphabetic.
-    if not key.isalpha():
-        raise SyntaxError("Bad master config file syntax: "+line)
     # Line must have contained "=".
     if not (op=="="):
         raise SyntaxError("Bad master config file syntax: "+line)
-    # Check there was text after "=".
-    if not value:
+    # Check there was a key and value.
+    if (not key) or (not value):
         raise SyntaxError("Bad master config file syntax: "+line)
-    # Valid characters for the value (right side of =).
+    # Valid characters for the key and value.
     value_chars = (string.punctuation.replace("#","").replace("=","") +
                    string.ascii_letters +
                    string.digits)
     # Value should be empty after removing all the valid characters.
-    if value.strip(value_chars):
+    if (value.strip(value_chars) or
+        key.strip(value_chars)):
         raise SyntaxError("Bad master config file syntax: "+line)
     return key,value
 
