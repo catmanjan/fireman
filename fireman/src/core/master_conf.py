@@ -12,8 +12,6 @@ TODO:
   test
   review considerations 
 CONSIDERATIONS:
-  How to find the configuration file? Currently hard coded, should be
-    set on install.
   Should I include functions to lock the configuration file? This can't
   be done with the normal master lock, as the configuration file
   defines that lock's location.
@@ -196,7 +194,7 @@ def _parse_config(filename):
     """Parses the config file at filename, returning a dictionary of
        options. 
        If the config file is poorly formed, an exception is raised.
-       Internal function. See use Options.
+       Internal function. Use Options.
     """
     options = {}
     # Can raise exception. Don't catch it.
@@ -221,5 +219,6 @@ def _parse_config(filename):
 # If main, then do some testing!
 if __name__ == "__main__":
     print "We test now."
-    print "The parsed configuration file:"
-    print Options("/etc/fireman/master.conf") 
+    print "Parsing /etc/fireman/master.conf"
+    options = Options("/etc/fireman/master.conf") 
+    print options
