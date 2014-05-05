@@ -9,6 +9,13 @@
      Design API for adding/removing rules/services 
    CONSIDERATIONS:see the notes
 """
+import sys
+import os
+if os.name == "posix":
+    import fcntl
+    import signal
+    import errno
+
 import master_conf as options
 # import master_conf - for interacting with options in the master config file
 # import service_conf - covers the implementation of rule/service storage
@@ -27,9 +34,9 @@ __all__ = [
 ]
 # if __name__ ==... run tests?
 
-# Whether or not we hold a lock on the core lock file.
+# If we have the core lock, the file is stored here.
 # Internal.
-_has_lock=False;
+_lock_fd = None
 # Whether or not we are forcing the program (ignoring locks).
 # Internal.
 _force=False;
@@ -41,25 +48,75 @@ def get_lock():
     """Attempts to wait and hold the core lock file. This is probably
        /var/www/fireman/lock, but can be set in the master
        configuration file.
-       Throws:
+       Throws - not guaranteed to be exhaustive:
+         EnvironmentError - not posix compatible environment
+         KeyError - required options don't exist in config file
+         Exception - must specify config file using set_master_config
+         IOError - error opening lock file or making directory
+         ValueError - config file entry for lock_timeout not a number
+         LockTimeoutError - system call timed out
     """
-    lock_file = core_conf.get("lock_file");
-    if not lock_file:
-        pass# throw an exception
-    else: 
-        pass# use system call to open lock file. throw exception if applic
+    global _lock_fd
+    # Locking is only provided on posix environment.
+    if os.name != 'posix':
+        raise EnvironmentError("File locking requires a posix environment.")
+    if not _options:
+        raise Exception("Set config file before calling other API functions.")
+    if _lock_fd:
+        raise IOError("Already have file lock. Release it first.")
+    # Directory to look for/make lock file (probably /var/fireman).
+    lock_dir = _options.get("lock_dir")
+    lock_name = _options.get("lock_name")
+    # We can continue without a lock timeout, so catch exception.
+    try:
+        lock_timeout = _options.get("lock_timeout")
+        lock_timeout = int(lock_timeout)
+    except KeyError:
+        lock_timeout = None
+    except ValueError:
+        raise ValueError("Non-integer lock_timeout in config file.")
+    # Make the directory if it doesn't exist.
+    if not os.path.exists(lock_dir):
+        os.makedirs(lock_dir)
+    # Open the lock file.
+    _lock_fd = open(os.path.join(lock_dir,lock_name),"w+")
+    # Set up timeout.
+    if lock_timeout:
+        old_handler = signal.signal(signal.SIGALRM,
+                                    lambda x,y:None)
+        signal.alarm(lock_timeout)
+    class LockTimeoutError(Exception):
+        pass
+    try:
+        fcntl.flock(_lock_fd,fcntl.LOCK_EX)
+    except IOError as e:
+        if errno.errorcode[e.errno] == "EINTR":
+            raise LockTimeoutError("Get lock timed out.")
+        else:
+            raise e
+ 
+    
+
 
 def release_lock():
     """Releases hold on core lock file. Throws an exception if the lock
        isn't already held. The lock will be released afterwards
        regardless.
-       Throws:
+       Throws - not guaranteed to be exhaustive:
+           EnvironmentError - non posix
+           Exception - didnt set config file
+           IOError - don't have lock
     """
-    lock_file = core_conf.get("lock_file");
-    if not lock_file:
-        pass# throw an exception
-    else:
-        pass#use system call to unlock file
+    global _lock_fd
+    if os.name != 'posix':
+        raise EnvironmentError("File locking requires a posix environment.")
+    if not _options:
+        raise Exception("Set config file before calling other API functions.")
+    if not _lock_fd:
+        raise IOError("You must get the lock before you release it.")
+    fcntl.flock(_lock_fd,fcntl.LOCK_UN)
+    _lock_fd.close()
+    _lock_fd = None
 
 def get_service_names():
     """Returns a list containing string representations of all
@@ -143,6 +200,9 @@ def generate_default_conf():
 
 def set_master_config(filename):
     """Sets the core to use filename as its master configuration file.
+       Throws - not guaranteed to be exhaustive:
+           IOError - error opening file
+           SyntaxError - config file syntax wrong
     """
     global _options
     _options = options.Options(filename)
@@ -159,3 +219,25 @@ if __name__ == "__main__":
     print "Here is the config file:"
     print _options
 
+    # To see if lock works, run this script twice with "lock" as the arg
+    if sys.argv[1] == "lock":
+        print "Getting lock."
+        get_lock()
+        print "Got lock."
+        while True:
+            pass
+
+    if sys.argv[1] == "unlock":
+        print "Getting lock."
+        get_lock()
+        print "Got lock. Releasing lock."
+        release_lock()
+        while True:
+            pass
+
+    if sys.argv[1] == "lockpoll":
+        while True:
+            print "Getting lock."
+            get_lock()
+            print "Got lock. Releasing lock."
+            release_lock()
