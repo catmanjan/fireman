@@ -103,7 +103,7 @@ class Options:
            If the config file does not contain foo=bar, then foo=foo is
            appended to the file.
         """
-        _set(self.filename,self.__options,option,value)
+        _set(self.__filename,self.__options,option,value)
 
 
 def _set(filename,options,key,value):
