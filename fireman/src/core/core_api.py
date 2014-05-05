@@ -3,10 +3,17 @@
 
    See fireman/doc/core_notes for some notes.
 
-   STATE:SKELETON
+   STATE:2/10
    TODO:
      Expand stubs.
      Design API for adding/removing rules/services 
+     get_service_names
+     start_service
+     stop_service
+     stop_service
+     get_service_emitter
+     refresh
+     generate_default_conf
    CONSIDERATIONS:see the notes
 """
 import sys
@@ -247,7 +254,7 @@ def set_master_config(filename):
 # Do some testing?
 if __name__ == "__main__":
     print "We test core API."
-    config_filename = "/etc/fireman/master.conf"
+    config_filename = "./master.conf"
     try:
         set_master_config(config_filename)
     except IOError:
