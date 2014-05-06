@@ -33,6 +33,7 @@ __all__ = [
     "start_service",
     "stop_service",
     "get_service_emitter",
+    "drop_service_emitter",
     "refresh",
     "generate_default_conf",
     "set_master_config"
@@ -45,6 +46,10 @@ _lock_fd = None
 # Whether or not we are forcing the program (ignoring locks).
 # Internal.
 _force=False;
+
+# Maps pipe file objects to their filenames.
+# Really, this should only ever contain one object, but why force it.
+_emitters = {}
 
 # Location of master config file on filesystem.
 # Internal.
@@ -182,25 +187,77 @@ def stop_service(service):
     pass
 
 def get_service_emitter():
-    """Returns a file descriptor. A byte of data will be read to this
-       descriptor whenever a new service is defined, or a service is
-       undefined. This allows a service listener to adjust the events
-       it listens for appropriately.
+    """Returns a file. A byte of data will be written to
+       this file whenever a new service is defined, or a service
+       is undefined. This allows a service listener to adjust the
+       events it listens for appropriately.
        
        The service listener is expected to grab the core lock, read out
-       any data present on this file descriptor, grab the list of
+       any data present on this file, grab the list of
        current services, then release the core lock.
+
+       This function could have easily returned the name of the
+       underlying pipe, instead of opening it for the user. However,
+       opening it has some complications that should be hidden.
+
+       Also, a file object is more useful, especially when following
+       an event driven model.
     """
     global _lock_fd
     global _force
+    global _emitters
     if (not _lock_fd) and (not _force):
         raise LockedError("Core is locked. Get the lock or force it.")
     # We will be using a named pipe. Deny non-posix environments.
     if os.name != 'posix':
         raise EnvironmentError("File locking requires a posix environment.")
     # Get the directory our emitters (named pipes) are to be stored.
-    emitter_dir = _options.get("emitter_dir") 
-    # Use a named pipe.
+    emitter_dir = _options.get("emitter_dir")
+    # os.tempnam can be vulnerable to symlink attack.
+    # It is okay to use with named pipes though.
+    # Also, emitter_dir should be owned by room.
+    pipe_name = os.tempnam(emitter_dir)
+    # Make pipe. Only we (root) can read and write to it.
+    os.mkfifo(pipe_name,0600)
+    # We don't want the open call to block (see fifo(7))
+    try:
+        fd = os.open(pipe_name,os.O_NONBLOCK|os.O_RDONLY)
+    except:
+        # Clean up, but reraise.
+        os.unlink(pipe_name)
+        raise
+    # We want to return a file object, not a file descriptor.
+    try:
+        f = os.fdopen(fd)
+    except:
+        # Clean up, but reraise.
+        os.close(fd)
+        os.unlink(pipe_name)
+        raise
+    # When the user is done, we have to be able to clean up.
+    # We need to be able to associate the file with its file name.
+    # Because we used os.fdopen, f.name is not set correctly.
+    # So, just store it in a dictionary.
+    if f in _emitters:
+        # Not sure how this would occur, but it shouldn't.
+        raise Exception("File already associated with a name.")
+    _emitters[f] = pipe_name 
+    return pipe_name
+
+def drop_service_emitter(fileobject):
+    """fileobject must be a file returned by get_service_emitter.
+       Closes fileobject, and cleans up (unlinks the FIFO)
+    """
+    pipe_name = _emitters[fileobject]
+    del _emitters[fileobject]
+    try:
+        fileobject.close()
+    except:
+        # We really want to try to unlink the file.
+        os.unlink(pipe_name)
+        raise
+    os.unlink(pipe_name)
+    
 
 def refresh():
     """Clears all rules from firewall. Reparses configuration file to
