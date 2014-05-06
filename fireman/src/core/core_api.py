@@ -195,7 +195,12 @@ def get_service_emitter():
     global _force
     if (not _lock_fd) and (not _force):
         raise LockedError("Core is locked. Get the lock or force it.")
-    pass
+    # We will be using a named pipe. Deny non-posix environments.
+    if os.name != 'posix':
+        raise EnvironmentError("File locking requires a posix environment.")
+    # Get the directory our emitters (named pipes) are to be stored.
+    emitter_dir = _options.get("emitter_dir") 
+    # Use a named pipe.
 
 def refresh():
     """Clears all rules from firewall. Reparses configuration file to
