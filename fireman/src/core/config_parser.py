@@ -36,6 +36,7 @@ The terminals:
   digit is a decimal digit
   characters enclosed in "" are string literals
   other_char is any of: !"$%&\'()*+,-./:;<>?@[\\]^_`{|}~
+    (this is string.punctuation - "=#" in python)
 
 Further restrictions:
   Each possible value for key may be present at most once.
