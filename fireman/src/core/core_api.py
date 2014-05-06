@@ -23,9 +23,7 @@ if os.name == "posix":
     import signal
     import errno
 
-import master_conf as options
-# import master_conf - for interacting with options in the master config file
-# import service_conf - covers the implementation of rule/service storage
+import config_parser as options
 
 __all__ = [
     "get_lock",
@@ -39,14 +37,15 @@ __all__ = [
     "generate_default_conf",
     "set_master_config"
 ]
-# if __name__ ==... run tests?
 
 # If we have the core lock, the file is stored here.
 # Internal.
 _lock_fd = None
+
 # Whether or not we are forcing the program (ignoring locks).
 # Internal.
 _force=False;
+
 # Location of master config file on filesystem.
 # Internal.
 _master_conf="/etc/fireman/master.conf"
