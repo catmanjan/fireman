@@ -100,21 +100,27 @@ class Options:
            set("foo","foo") changes the line foo=bar to foo=foo.
            If the config file does not contain foo=bar, then foo=foo is
            appended to the file.
+           If value is the empty string, the option is deleted
+           entirely.
         """
         _set(self.__filename,self.__options,option,value)
 
 
 def _set(filename,options,key,value):
-    """If any line in the filename assigns a something to key, that
-       something is replaced by value.
+    """If any line in the filename assigns a something to key, that something is replaced by value.
        Otherwise, the line: key=value is appended to the config file.
        get(key) will return the new value, without reparsing the config
        file.
        Also updates dictionary appropriately.
+       If value is the empty string, the key/value pair is removed
+       entirely.
        This is internal. Use Options.
     """
     # Set the option in our dictionary.
-    options[key] = value
+    if not value:
+        del options[key]
+    else:
+        options[key] = value
     # We need to also set the option in the config file.
     lines = []
     found = False
@@ -141,9 +147,10 @@ def _set(filename,options,key,value):
             raise SyntaxError("Master config file has duplicate options")
         found = True;
         # Store the updated line.
-        lines.append(key+" = "+value+"\n")
+        if value:
+            lines.append(key+" = "+value+"\n")
     # If we didn't find a match, put the new option on the end.
-    if not found:
+    if (not found) and value:
         lines.append(key+" = "+value+"\n")
     # Now write the lines back to the file. Reopen it for writing.
     config.close()
