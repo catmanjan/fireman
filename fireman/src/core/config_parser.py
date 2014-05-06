@@ -69,7 +69,7 @@ class Options:
 
        Providing it as a class rather than a set of functions creates
        a cleaner interface, especially when testing (as multiple config
-       files may be parsed during a testing session.
+       files may be parsed during a testing session).
     """
     def __init__(self,filename):
         """The object is initialised by giving it a file name to parse.
