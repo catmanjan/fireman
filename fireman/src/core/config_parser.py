@@ -217,5 +217,5 @@ def _parse_config(filename):
 if __name__ == "__main__":
     print "We test now."
     print "Parsing /etc/fireman/master.conf"
-    options = Options("/etc/fireman/master.conf") 
+    options = Options("./master.conf") 
     print options
