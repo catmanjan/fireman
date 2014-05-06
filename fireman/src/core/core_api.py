@@ -11,7 +11,6 @@
      start_service
      stop_service
      stop_service
-     get_service_emitter
      refresh
      generate_default_conf
    CONSIDERATIONS:see the notes
@@ -50,10 +49,6 @@ _force=False;
 # Maps pipe file objects to their filenames.
 # Really, this should only ever contain one object, but why force it.
 _emitters = {}
-
-# Location of master config file on filesystem.
-# Internal.
-_master_conf="/etc/fireman/master.conf"
 
 class LockedError(Exception):
     """Thrown whenever a function that requires the core lock is called
