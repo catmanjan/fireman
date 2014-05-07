@@ -1,9 +1,5 @@
 """
-Gets or sets options defined by the master configuration file. The
-location of this file is hard-coded and expected to be set on install.
-
-The configuration file is parsed when this module is imported. It
-can be reparsed upon request.
+Gets or sets options defined by a given configuration file path.
 
 STATE:complete/untested
 TODO:
@@ -15,6 +11,9 @@ CONSIDERATIONS:
   Should I include functions to lock the configuration file? This can't
   be done with the normal master lock, as the configuration file
   defines that lock's location.
+
+See master.conf for default configuration file. The format is pretty
+obvious from this. Below is a formal description of the syntax:
 
 Config file format - see en.wikipedia.org/wiki/Backus-Naur_Form
 <config_file> ::= null | <line> <config_file>
@@ -67,16 +66,14 @@ class Options:
        Usage is something like:
          options = Options("/etc/fireman/master.conf")
          options.get("services_folder")
-
-       Providing it as a class rather than a set of functions creates
-       a cleaner interface, especially when testing (as multiple config
-       files may be parsed during a testing session).
+         options.set("foo","bar")
+         assert(options.get("foo")=="bar")
     """
     def __init__(self,filename):
         """The object is initialised by giving it a file name to parse.
            Throws:
-             IOError
-             SyntaxError
+             IOError - trouble opening file
+             SyntaxError - poorly formed config file
         """
         self.__filename = filename
         self.__options = _parse_config(self.__filename)
@@ -87,7 +84,7 @@ class Options:
         """Get an option from the Options object.
            E.g: if config file contains foo=bar, then get("foo")=="bar"
            Throws:
-             KeyError
+             KeyError - option foo doesn't exist
         """
         return self.__options[option]
 
@@ -97,19 +94,21 @@ class Options:
            underlying configuration file being updated to reflect
            the action.
            E.g: if the config file contains foo=bar, then
-           set("foo","foo") changes the line foo=bar to foo=foo.
+           set("foo","foo") changes the line foo=bar to foo=foo,
+           and updates the Options object.
            If the config file does not contain foo=bar, then foo=foo is
-           appended to the file.
-           If value is the empty string, the option is deleted
-           entirely.
+           appended to the file, and updated in the Options object.
+           If value is the empty string, the option is deleted entirely.
         """
         _set(self.__filename,self.__options,option,value)
 
 
 def _set(filename,options,key,value):
-    """If any line in the filename assigns a something to key, that something is replaced by value.
+    """INTERNAL DONT IMPORT ME
+       If any line in the filename assigns a something to key, that
+       something is replaced by value.
        Otherwise, the line: key=value is appended to the config file.
-       get(key) will return the new value, without reparsing the config
+       _get(key) will return the new value, without reparsing the config
        file.
        Also updates dictionary appropriately.
        If value is the empty string, the key/value pair is removed
@@ -164,7 +163,8 @@ def _set(filename,options,key,value):
     config.close()
 
 def _evaluate_line(line):
-    """Internal function. line is a line that matches a line from the
+    """INTERNAL DONT IMPORT ME
+       line is a line that matches a line from the
        config file format. Returns parsed (key,value), or ("","") if the
        line contains no option. Throws a SyntaxError on bad line.
     """
@@ -196,7 +196,8 @@ def _evaluate_line(line):
     return key,value
 
 def _parse_config(filename):
-    """Parses the config file at filename, returning a dictionary of
+    """INTERNAL DONT IMPORT ME
+       Parses the config file at filename, returning a dictionary of
        options. 
        If the config file is poorly formed, an exception is raised.
        Internal function. Use Options.
@@ -224,6 +225,6 @@ def _parse_config(filename):
 # If main, then do some testing!
 if __name__ == "__main__":
     print "We test now."
-    print "Parsing /etc/fireman/master.conf"
+    print "Parsing ./master.conf"
     options = Options("./master.conf") 
     print options

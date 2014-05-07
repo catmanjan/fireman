@@ -5,7 +5,6 @@
 
    STATE:2/10
    TODO:
-     Expand stubs.
      Design API for adding/removing rules/services 
      get_service_names
      start_service
@@ -13,7 +12,7 @@
      stop_service
      refresh
      generate_default_conf
-   CONSIDERATIONS:see the notes
+   CONSIDERATIONS:fireman/doc/core_notes
 """
 import sys
 import os
@@ -47,6 +46,8 @@ _lock_fd = None
 _force=False;
 
 # Maps pipe file objects to their filenames.
+# The file is a named pipe that is used to signal events (see
+#     get_service_emitter)
 # Really, this should only ever contain one object, but why force it.
 _emitters = {}
 
@@ -69,8 +70,8 @@ def get_lock():
          LockTimeoutError - system call timed out
        Locking is enforced, but only superficially. The lock can be
        forced open if the application wishes. The point of enforcing
-       the lock is to force API users to consider using the locking
-       functionality. 
+       the lock is to make sure API users only ignore the lock on
+       purpose. 
     """
     global _lock_fd
     # Locking is only provided on posix environment.
@@ -115,6 +116,7 @@ def release_lock():
     """Releases hold on core lock file. Throws an exception if the lock
        isn't already held. The lock will be released afterwards
        regardless.
+       Lock is held in global _lockfd.
        Throws - not guaranteed to be exhaustive:
            EnvironmentError - non posix
            Exception - didnt set config file
@@ -144,9 +146,12 @@ def force_lock(force):
 
 def get_service_names():
     """Returns a list containing string representations of all
-       registered service names (this includes registered but
+       registered firewall service names (this includes registered but
        stopped services). These names are fetched from service
        config files.
+
+       TODO - write this once the API has been designed and data
+       storage method decided/implemented.
     """
     global _lock_fd
     global _force
@@ -157,6 +162,7 @@ def get_service_names():
 def start_service(service):
     """Adds all the rules associated with string:service using the
        underlying firewall software.
+       TODO
        Throws:
     """
     # get all the rules associated with service from config file
@@ -171,6 +177,7 @@ def start_service(service):
 def stop_service(service):
     """Removes  all the rules associated with string:service using the
        underlying firewall software.
+       TODO
        Throws:
     """
     # get all the rules associated with service from config file
@@ -195,8 +202,8 @@ def get_service_emitter():
        underlying pipe, instead of opening it for the user. However,
        opening it has some complications that should be hidden.
 
-       Also, a file object is more useful, especially when following
-       an event driven model.
+       Also, a file object (or fd) is more useful, especially when
+       following an event driven model.
     """
     global _lock_fd
     global _force
@@ -269,7 +276,7 @@ def generate_default_conf():
        (defined in master configuration file). Runs each import's
        generate function. This function returns a string containing
        the generated config file for the service with the same name
-       as the scripts file name. This config file is added to the
+       as the script's file name. This config file is added to the
        default_services directory.
        Example:
            Assume default_conf_scripts contains a file called 
@@ -282,9 +289,9 @@ def generate_default_conf():
        This creates a flexible and simple method for including default
        rules for common services. Rules in default_services are given
        lowest priority so that they do not conflict with user defined
-       rules. The default services' rules can copied to another folder
-       and modified by hand, to tailor the rules to the user. It is not
-       recommended to edit the rules in place, as they will be
+       rules. The default services' rules can be copied to another
+       directory and modified by hand, to tailor the rules to the user.
+       It is not recommended to edit the rules in place, as they will b
        destroyed if generate_default_conf() is called again.
     """
     global _lock_fd
@@ -296,7 +303,7 @@ def generate_default_conf():
 def set_master_config(filename):
     """Sets the core to use filename as its master configuration file.
        This file is parsed and the options will be used by other core
-       functions.
+       functions. The options object is stored in the global _options.
        Throws - not guaranteed to be exhaustive:
            IOError - error opening file
            SyntaxError - config file syntax wrong
