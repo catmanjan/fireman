@@ -1,4 +1,6 @@
-
+""" Converts any Python object to dictionary recursively
+    including iterating over iterables
+"""
 def todict(obj):
     """ Converts object to dictionary recursively
         (Object, str) -> {str : object}
