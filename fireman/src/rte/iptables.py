@@ -5,7 +5,7 @@ import subprocess
 import objtodict
 
 
-class Iptables:
+class Iptables(object):
     """ An Iptables which holds iptables' rule model
         and deals with the interface between fireman and iptables
     """
