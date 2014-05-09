@@ -1,9 +1,12 @@
 # Author: Jack Rutherford
 # Project: Project Fireman
 # Purpose: Monitor input processIDs to see when they go up and down
+# Usage: python service_listener arg1 arg2 ...
+# Usage Note: services input as keywords, not .service files.
 
 # Imports
 from subprocess import Popen, PIPE
+import datetime
 import time
 import sys
 
@@ -32,12 +35,13 @@ def checkPID(program):
     # Remove the last value of the list as it will always be a blank line
     processList = grepCheck.split('\n')[:-1]
     # Filter out the processes created by
-    # running this program, and calling grep
+    # running this program, calling grep, and calling sudo
     grepFiltered = [v for v in processList if not v.startswith('grep')]
     pythonFiltered = [v for v in grepFiltered if not v.startswith('python')]
+    sudoFiltered = [v for v in pythonFiltered if not v.startswith('sudo')]
 
     # if the list is empty, return 0
-    if not pythonFiltered:
+    if not sudoFiltered:
         return 0
 
     # Now we have a list of the commands for each process
@@ -48,7 +52,7 @@ def checkPID(program):
 
     # Use the list of commands to output PIDs
     p1 = Popen(['ps', 'aux'], stdout=PIPE)
-    p2 = Popen(['grep', pythonFiltered[0]], stdin=p1.stdout, stdout=PIPE)
+    p2 = Popen(['grep', sudoFiltered[0]], stdin=p1.stdout, stdout=PIPE)
     p4 = Popen(['awk', '{print $2}'], stdin=p2.stdout, stdout=PIPE)
     # Just get the first value for now - will upgrade later
     p5 = Popen(['head', '-n1'], stdin=p4.stdout, stdout=PIPE)
@@ -82,23 +86,38 @@ def Monitor_Procs(programs, PIDCache):
 
     print "Monitor Phase: "
     while(1):
-        x = 0
-        time.sleep(timer)
-        for program in programs:
-            # See if the process is running
-            PIDList[x] = (checkPID(program))
-            # If value is different, state of process has changed
-            if (PIDList[x] != PIDCache[x]):
-                # check if process has gone up
-                if (PIDList[x] > 0):
-                    print ("'" + program + "'" + " has new PID of: %s"
-                           % PIDList[x])
-                    PIDCache[x] = PIDList[x]
-                # or down
-                else:
-                    print ("'" + program + "'" + " has stopped running.")
-                    PIDCache[x] = PIDList[x]
-            x += 1
+        try:
+            x = 0
+            time.sleep(timer)
+            for program in programs:
+                # See if the process is running
+                PIDList[x] = (checkPID(program))
+                # If value is different, state of process has changed
+                if (PIDList[x] != PIDCache[x]):
+                    # check if process has gone up
+                    if (PIDList[x] > 0):
+                        # get current time, print out results
+                        now = datetime.datetime.now()
+                        currentTime = datetime.time(now.hour, now.minute,
+                                                    now.second)
+                        print ("'" + program + "'" +
+                               " started - \n\tTime: %s \n\tPID: %s "
+                               % (currentTime, PIDList[x]))
+                        PIDCache[x] = PIDList[x]
+                    # or down
+                    else:
+                        # get current time, print out results
+                        now = datetime.datetime.now()
+                        currentTime = datetime.time(now.hour, now.minute,
+                                                    now.second)
+                        print ("'" + program + "'"
+                               + " stopped - \n\tTime: %s"
+                               % currentTime)
+                        PIDCache[x] = PIDList[x]
+                x += 1
+        except KeyboardInterrupt:
+            print "\nShutdown requested... exiting."
+            sys.exit(0)
 
 
 # Provide initial report of
@@ -110,6 +129,14 @@ def Initial():
     programs.pop(0)			# remove the first arg (program name)
     PIDCache = []			# list for PIDs
     x = 0					# simple counter
+
+    print "Starting... Exit with '^C'"
+
+    # Check for arguments
+    if not programs:
+        print "Error: No args given."
+        print "Usage: 'python service_listener arg1 arg2 ...'"
+        sys.exit(1)
 
     print "Initial Report: "
     for program in programs:
