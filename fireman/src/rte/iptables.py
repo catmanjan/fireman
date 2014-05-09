@@ -32,14 +32,19 @@ class Iptables:
         """ Add Iptables rule to iptables
             (Iptables) -> None
         """
+        # args will store arguments for iptables
         args = ["iptables"]
         if self.rule_number is None:
+            # append rule
             args.extend(["-A", "INPUT"])
         else:
+            # insert rule
             args.extend(["-I", "INPUT", str(self.rule_number)])
         if self.target is not None:
+            # if target is specified add this
             args.extend(["-j", self.target])
 
+        # add rule id as comment
         args.extend(["-m", "comment", "--comment", self.rule_id])
         #TODO: add conditions
 
