@@ -2,7 +2,7 @@
 # Project: Project Fireman
 # Purpose: Monitor input processIDs to see when they go up and down
 # Usage: python service_listener arg1 arg2 ...
-# Usage Note: services input as keywords, not .service files.
+# Usage Note: input services as keywords, not .service files.
 
 # Imports
 from subprocess import Popen, PIPE
