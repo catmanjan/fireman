@@ -1,0 +1,38 @@
+Information on systemd journalling that I mentioned in the meeting:
+
+systemd maintains a journal that many processes can write to.
+
+The journal is a list of entries, each with some fields.
+
+Some fields are enforced by systemd, meaning they are secure. These fields start with an underscore (such as _PID).
+
+Journal system calls allow for filtering the journal in kernel space. This is efficent.
+
+The API also lets you get a file descriptor that alerts you when more data is available, so you can do event driven stuff (probably using select, or poll, which python provides wrappers for). This is VERY important. The core API also provides a file descriptor to tell you when services are added and deleted, so this fits in nicely.
+
+The security concern about process name spoofing is no longer an issue. We can associate fireman services with systemd services, and systemd journalling will tell us when that service goes up or down in a secure way.
+
+see man pages:
+sd-journal
+sd_journal_open
+sd_journal_get_data
+sd_journal_next
+sd_journal_get_fd
+etc...
+
+I wrote some code while playing with it. It finds all logging entries made by the systemd process (so the entries are implicitely trusted) that are to do with the httpd.service (the service definition for the apache webserver).
+See journal_example.c
+
+To replicate my test:
+make sure you have apache installed (yum install httpd)
+make sure you have gcc (yum install gcc)
+make sure you have systemd-devel tools (yum install systemd-devel)
+make sure you have man pages (yum install man-pages)
+
+Do as root:
+gcc -o test -lsystemd-journal journal_example.c
+systemctl stop httpd
+systemctl start httpd
+./test
+
+This outputs all the fields for all the entries made by _PID 1 (systemd), with UNIT=httpd.service.
