@@ -12,6 +12,7 @@
      stop_service
      refresh
      generate_default_conf
+     add a global start/stop mechanism - what will this mean?
    CONSIDERATIONS:fireman/doc/core_notes
 """
 import sys
@@ -310,6 +311,7 @@ def set_master_config(filename):
        This function does NOT require the core lock. All it does is
        parse a file. Also, the config defines the location of the lock
        file.
+       Should this be exported?
     """
     global _options
     _options = options.Options(filename)
