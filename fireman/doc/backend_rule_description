@@ -7,7 +7,7 @@ adding a rule (using the rule model)
 deleting a rule based on its metadata (in iptables this is a `comment')
 
 A rule class will be written, let's call it Rule.
-Rule will contain a comment field, which is a string.
+Rule will contain a id field, which is a string.
 Rule will contain an action, which can be: ACCEPT/DROP/REJECT, or maybe more.
 A rule will contain a list of `conditions'. The semantics are that if a packet matches all of these conditions, then the Rule's action will be taken, otherwise the rule will be skipped.
 
@@ -26,7 +26,7 @@ class PrivateIPCondition(Condition):
 
 myRule = Rule()
 myRule.setAction(ACCEPT)
-myRule.setComment("This is my rule! It accepts http requests on the local network.")
+myRule.setId("154364586")
 myRule.addCondition(TCPPortCondition(80))
 myRule.addCondition(PrivateIPCondition(Condition))
 
