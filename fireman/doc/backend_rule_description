@@ -1,0 +1,33 @@
+The rule translation engine and the core need to communicate. This is facilitated by using a common model for describing firewall rules. This model is a low level rule description (a higher level one is used that describes rules in terms of services).
+
+Oliver and Matthew wrote these notes in a meeting - they are NOT concrete, but give enough of a model to begin moving forward.
+
+The rule translation engine, at a BARE minimum must provide the following functionality in some form:
+adding a rule (using the rule model)
+deleting a rule based on its metadata (in iptables this is a `comment')
+
+A rule class will be written, let's call it Rule.
+Rule will contain a id field, which is a string.
+Rule will contain an action, which can be: ACCEPT/DROP/REJECT, or maybe more.
+A rule will contain a list of `conditions'. The semantics are that if a packet matches all of these conditions, then the Rule's action will be taken, otherwise the rule will be skipped.
+
+We will use a class called Condition to represent conditions.
+This class will be abstract (creating one will probably raise an exception).
+Specific conditions will be created by subclassing Condition, instansiating any necessary fields, and storing these in a Rule's condition list.
+
+Usage may look something like this (this is NOT concrete, class names/usage may vary slightly. This is meant to convey the general idea):
+
+class TCPPortCondition(Condition):
+    __init__(self,portRange):
+        self.portRange = portRange
+
+class PrivateIPCondition(Condition):
+    pass
+
+myRule = Rule()
+myRule.setAction(ACCEPT)
+myRule.setId("154364586")
+myRule.addCondition(TCPPortCondition(80))
+myRule.addCondition(PrivateIPCondition(Condition))
+
+ruleTranslationEngine.add(myRule)
