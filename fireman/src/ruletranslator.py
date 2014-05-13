@@ -5,7 +5,7 @@ from rte import iptables
 from rte.iptables import Iptables
 import xmltodict
 import json
-import objtodict
+from utilities import objtodict
 
 
 def add_rule(rule, service_name):
