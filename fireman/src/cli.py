@@ -19,26 +19,30 @@ args = parser.parse_args()
 started = False
 
 # Below is the parsing logic for removing a service.
-check_rm = args.removeservice
-check_rm_lower = check_rm.lower()
-service_list = #API call for a list of services
+if (args.removeservice != None):
+	check_rm = args.removeservice
+	check_rm_lower = check_rm.lower()
+	service_list = ["default_service"]#TODO API call for a list of services
 # First check for any services with the same service name you are trying to add, check for lower or uppercase variants.
-if (any(check_rm_lower == val.lower() for val in service_list) == True): 
-	# Call the API Function here to remove 'check_rm' from the list of services.
-	# Also will need to have any firewall rules associated with this service change
-	# their associated service to the 'default_service'.
-else:
-	print("The service " + check_rm + " doesn't exist.")
+	if (any(check_rm_lower == val.lower() for val in service_list) == True): 
+		print("TODO Call the API Function here to remove 'check_rm' from the list of services.")
+		# TODO Call the API Function here to remove 'check_rm' from the list of services.
+		# Also will need to have any firewall rules associated with this service change
+		# their associated service to the 'default_service'.
+	else:
+		print("The service " + check_rm + " doesn't exist.")
 
 # Below is the parsing logic for adding a new service.
-check = args.addservice
-check_lower = check.lower()
-service_list = #API call for a list of services
-# First check for any services with the same service name you are trying to add, check for lower or uppercase variants.
-if (any(check_lower == val.lower() for val in service_list) == True): 
-	print("The service name " + check + " is already being used, please choose another.")
-else:
-	# Call the API Function here to add 'check' to the list of services.
+if (args.addservice != None):
+	check = args.addservice
+	check_lower = check.lower()
+	service_list = ["default_service"] #TODO API call for a list of services
+	# First check for any services with the same service name you are trying to add, check for lower or uppercase variants.
+	if (any(check_lower == val.lower() for val in service_list) == True): 
+		print("The service name " + check + " is already being used, please choose another.")
+	else:
+		print("TODO Call the API Function here to add 'check' to the list of services.")
+		#TODO Call the API Function here to add 'check' to the list of services.
 	
 # Below is the parsing logic for adding a new firewall rule.
 temp_service = args.service
@@ -52,20 +56,22 @@ temp_action = args.action
 # can be looked up using the CLI. This ID is used to modify and delete rules.
 
 # Below is the parsing logic for removing a firewall rule.
-temp = args.removeservice
-temp_id = args.id
-service_list = #call API function for a list of services
-# First stage is to check if the service name even exists.
-temp_lower = temp.lower()
-if (any(temp_lower == val.lower() for val in service_list) == True): 
-	# Now try to remove the rule from the associated service. 
-	# Or catch any errors (which means the service didn't have this rule ID)
-	try:
-		#TODO Call API function to remove rule. This requires a service and an ID.
-	except Exception as e
-		print("This rule ID doesn't exist for this service.")
-else:
-	print("This service " + temp + " does not exist, unable to remove rule.")
+if (args.removerule != None):
+	temp = args.removerule[0]
+	temp_id = args.removerule[1]
+	service_list = ["default_service"] #TODO call API function for a list of services
+	# First stage is to check if the service name even exists.
+	temp_lower = temp.lower()
+	if (any(temp_lower == val.lower() for val in service_list) == True): 
+		# Now try to remove the rule from the associated service. 
+		# Or catch any errors (which means the service didn't have this rule ID)
+		try:
+			print("TODO Call API function to remove rule. This requires a service and an ID.")
+			#TODO Call API function to remove rule. This requires a service and an ID.
+		except Exception as e:
+			print("This rule ID doesn't exist for this service.")
+	else:
+		print("This service " + temp + " does not exist, unable to remove rule.")
 
 # Below is the parsing logic of some more general arguments.
 if (args.view == "rules"):
