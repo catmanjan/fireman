@@ -139,7 +139,7 @@ if (args.control == "start"):
         # TODO Call matthews API to start Fireman.
 
 elif (args.control == "stop"):
-    if (!started):
+    if not (started):
         print("Fireman is not currently active.")
     else:
         started = False
@@ -147,7 +147,7 @@ elif (args.control == "stop"):
         # TODO API call
 
 elif (args.control == "refresh"):
-    if (!started):
+    if not (started):
         print("""Fireman is not currently active
               , please start Fireman before refreshing."""
               )
