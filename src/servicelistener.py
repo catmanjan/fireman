@@ -70,8 +70,8 @@ def checkPID(program):
 
 
 def Monitor_Procs(programs, PIDCache):
-    """ Provide an update every time
-        a process goes up or down
+    """ Provide an update every time a process goes up or down
+        (List, List)
     """
     y = 0
     timer = 3       # Wait time before checking for changes

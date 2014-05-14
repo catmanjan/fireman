@@ -49,13 +49,15 @@ def delete_rule(rule, service_name):
                          " is not yet supported")
 
 
-def translate(rule, format):
+def translate(rule, format_name):
     """ Translate the set of rules into a specified format
         (Rule, str) -> None
+        
+        Currently supports format_name "json" or "xml"
     """
-    if format == "json":
+    if format_name == "json":
         return json.dumps(objtodict.todict(rule))
-    elif format == "xml":
+    elif format_name == "xml":
         return xmltodict.unparse(objtodict.todict(rule))
     else:
-        raise ValueError("Error: " + format + " is not yet supported")
+        raise ValueError("Error: " + format_name + " is not yet supported")
