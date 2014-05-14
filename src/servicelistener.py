@@ -1,21 +1,18 @@
-# Author: Jack Rutherford
-# Project: Project Fireman
-# Purpose: Monitor input processIDs to see when they go up and down
-# Usage: python service_listener arg1 arg2 ...
-# Usage Note: input services as keywords, not .service files.
-
-# Imports
+""" Monitor input processIDs to see when they go up and down
+    input services as keywords, not .service files.
+"""
 from subprocess import Popen, PIPE
 import datetime
 import time
 import sys
 
 
-# Check if an input program is running
-# If it is, return PID
-# If not, return 0
 def checkPID(program):
-
+    # JM: isn't PID 0 a valid PID? May need to make this return -1 in the event
+    # of an error
+    """ Check if an input program is running if it is, return PID, 
+        if not, return 0
+    """
     # Uses the Popen functionality to simulate terminal commands
     # 'ps aux' returns a list of running daemons
     p1 = Popen(['ps', 'aux'], stdout=PIPE)
@@ -72,10 +69,10 @@ def checkPID(program):
     return PID
 
 
-# Provide an update every time
-# a process goes up or down
 def Monitor_Procs(programs, PIDCache):
-
+    """ Provide an update every time
+        a process goes up or down
+    """
     y = 0
     timer = 3       # Wait time before checking for changes
     PIDList = []    # Temp list for PID updates
@@ -120,10 +117,10 @@ def Monitor_Procs(programs, PIDCache):
             sys.exit(0)
 
 
-# Provide initial report of
-# the state of input processes
 def Initial():
-
+    """ Provide initial report of
+        the state of input processes
+    """
     # Local declarations
     programs = sys.argv		# list of args - process names
     programs.pop(0)			# remove the first arg (program name)
