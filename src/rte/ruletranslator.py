@@ -1,11 +1,11 @@
 """ An interface for translating and executing rules using specific
     formats and firewall services
 """
-from rte import iptables
-from rte.iptables import Iptables
+import iptables
+from iptables import Iptables
 import xmltodict
 import json
-from utilities import objtodict
+from .utils import objtodict
 
 
 def add_rule(rule, service_name):

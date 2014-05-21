@@ -2,7 +2,7 @@
     the Rule model and unique identifiers stored in comments
 """
 import subprocess
-import objtodict
+from ..utils import objtodict
 
 
 class Iptables(object):

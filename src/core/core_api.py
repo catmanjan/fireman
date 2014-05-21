@@ -17,14 +17,19 @@
 """
 import sys
 import os
+import thread
 if os.name == "posix":
     import fcntl
     import signal
     import errno
 
 import config_parser as options
+from ..services import servicelistener as daemon
+
 
 __all__ = [
+    "start_daemon",
+    "stop_daemon",
     "get_lock",
     "release_lock",
     "force_lock",
@@ -57,6 +62,21 @@ class LockedError(Exception):
        if the core lock is not held, and forcing has not been enabled.
     """
     pass
+
+
+def start_daemon():
+    # JM: To be replaced with a list of service names we are listening for
+    programs = [ "httpd" ]
+    # JM: To be replaced with a list of matching process IDs
+    pids = [ 0 ]
+
+    thread.start_new_thread( daemon.monitor_services, ( programs, pids, ) )
+
+
+def stop_daemon():
+    # JM: To be implemented by someone
+    print "unimplemented"
+
 
 def get_lock():
     """Attempts to wait and hold the core lock file. This is probably

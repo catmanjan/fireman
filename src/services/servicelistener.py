@@ -7,7 +7,7 @@ import time
 import sys
 
 
-def checkPID(program):
+def check_process_id(program):
     # JM: isn't PID 0 a valid PID? May need to make this return -1 in the event
     # of an error
     """ Check if an input program is running if it is, return PID, 
@@ -69,7 +69,9 @@ def checkPID(program):
     return PID
 
 
-def Monitor_Procs(programs, PIDCache):
+# JM: What is programs? What is PIDCache? Need to know the types of each and
+# what values they are expecting
+def monitor_services(programs, PIDCache):
     """ Provide an update every time
         a process goes up or down
     """
@@ -88,7 +90,7 @@ def Monitor_Procs(programs, PIDCache):
             time.sleep(timer)
             for program in programs:
                 # See if the process is running
-                PIDList[x] = (checkPID(program))
+                PIDList[x] = (check_process_id(program))
                 # If value is different, state of process has changed
                 if (PIDList[x] != PIDCache[x]):
                     # check if process has gone up
@@ -117,10 +119,10 @@ def Monitor_Procs(programs, PIDCache):
             sys.exit(0)
 
 
-def Initial():
-    """ Provide initial report of
-        the state of input processes
-    """
+# JM: Replace this with a unit test or something
+"""def Initial():
+    # Provide initial report of
+    #    the state of input processes
     # Local declarations
     programs = sys.argv		# list of args - process names
     programs.pop(0)			# remove the first arg (program name)
@@ -138,7 +140,7 @@ def Initial():
     print "Initial Report: "
     for program in programs:
         # See if the process is running
-        PIDCache.append(checkPID(program))
+        PIDCache.append(check_process_id(program))
         # If 0 is returned, process not active.
         if (PIDCache[x] == 0):
             print ("'" + program + "'" + " not currently active.")
@@ -147,6 +149,4 @@ def Initial():
         x += 1
 
     # begin to monitor the input processes
-    Monitor_Procs(programs, PIDCache)
-
-Initial()
+    Monitor_Procs(programs, PIDCache)"""
