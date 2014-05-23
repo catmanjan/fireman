@@ -3,6 +3,9 @@
 """
 import subprocess
 from ..utils import objtodict
+from action import Action
+from chain import Chain
+from collections import OrderedDict
 
 
 class Iptables(object):
@@ -14,15 +17,39 @@ class Iptables(object):
         """ Make a new Iptables from a Rule object.
             (Iptables, Rule) -> None
         """
-        # the target of the rule ie. what to do if the packet matches
-        self.target = None
-        if rule.target == 0:
-            self.target = "ACCEPT"
-        elif rule.target == 1:
-            self.target = "DROP"
+        # converts generic rule model conditions into commands for
+        # iptables. This is ordered because certain arguments need to
+        # be before others. Order the keys in the order the arguments
+        # need to be added.
+        self.condition_conversions =
+        OrderedDict([('protocol', '-p'),
+                    ('source_port', '--sport'),
+                    ('destination_port', '--dport'),
+                    ('input_interface', '-i'),
+                    ('output_interface', '-o'),
+                    ('source_address', '-s'),
+                    ('destination_address', '-d')])
+
+        # the chain the rule is appended to (INPUT or OUTPUT)
+        # set as INPUT on default
+        self.chain = "INPUT"
+        if rule.chain == Chain.INPUT:
+            self.chain = "INPUT"
+        elif rule.chain == Chain.OUTPUT:
+            self.chain = "OUTPUT"
+
+        # the action of the rule ie. what to do if the packet matches
+        self.action = None
+        if rule.action == Action.ACCEPT:
+            self.action = "ACCEPT"
+        elif rule.action == Action.DROP:
+            self.action = "DROP"
 
         # matching criteria
-        self.conditions = rule.conditions
+        self.conditions = []
+        for condition in rule.conditions:
+            # creates a dict of each condition
+            self.conditions.append(objtodict.todict(condition))
         # where to add this rule in iptables - ignored if None
         self.rule_number = rule.rule_number
         # unique identifier
@@ -36,17 +63,26 @@ class Iptables(object):
         args = ["iptables"]
         if self.rule_number is None:
             # append rule
-            args.extend(["-A", "INPUT"])
+            args.extend(["-A", self.chain])
         else:
             # insert rule
-            args.extend(["-I", "INPUT", str(self.rule_number)])
-        if self.target is not None:
-            # if target is specified add this
-            args.extend(["-j", self.target])
+            args.extend(["-I", self.chain, str(self.rule_number)])
+        if self.action is not None:
+            # if action is specified add this
+            args.extend(["-j", self.action])
+
+        # convert each condition to an iptables argument
+        for condition in self.conditions:
+            # run through each key of conversions, this is to retain
+            # ordering
+            for key in self.condition_conversions:
+                if key in condition:
+                    args.extend([
+                                self.condition_conversions[key],
+                                str(condition[key])])
 
         # add rule id as comment
         args.extend(["-m", "comment", "--comment", self.rule_id])
-        #TODO: add conditions
 
         # will call iptables to add rules
         try:

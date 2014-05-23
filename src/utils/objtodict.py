@@ -1,6 +1,8 @@
 """ Converts any Python object to dictionary recursively
     including iterating over iterables
 """
+
+
 def todict(obj):
     """ Converts object to dictionary recursively
         (Object, str) -> {str : object}
@@ -15,9 +17,11 @@ def todict(obj):
     elif hasattr(obj, "__iter__"):
         return [todict(v) for v in obj]
     elif hasattr(obj, "__dict__"):
-        data = dict([(key, todict(value)) 
-            for key, value in obj.__dict__.iteritems() 
-            if not callable(value) and not key.startswith('_')])
+        data = dict([(key, todict(value))
+                     for key, value in obj.__dict__.iteritems()
+                     if not callable(value) and
+                     not key.startswith('_') and
+                     value is not None])
         return data
     else:
         return obj
