@@ -62,7 +62,7 @@ class Iptables(object):
         # args will store arguments for iptables
         args = ["iptables"]
         if self.rule_number is None:
-            # append rule
+            # prepend rule
             args.extend(["-I", self.chain, "1"])
         else:
             # insert rule
@@ -95,16 +95,16 @@ class Iptables(object):
             (Iptables) -> None
         """
         # delete rule using id
-        delete_rule(self.rule_id)
+        delete_rule(self.rule_id, self.chain)
 
 
-def delete_rule(rule_id):
+def delete_rule(rule_id, chain=""):
     """ Delete an iptables rule using the rule_id stored in the
         comments of the rule
         (str) -> None
     """
     # search for the rule using id
-    rules = find(rule_id)
+    rules = find(rule_id, chain)
     if rules is None:
         return
     # the first column stores the rule number - filter by this
@@ -120,7 +120,7 @@ def delete_rule(rule_id):
         print "Error when deleting rule: " + iptables_list
 
 
-def find(rule_id):
+def find(rule_id, chain=""):
     """ Find an iptables rule using the rule_id stored in the comments
         of the rule
         (str) -> str
@@ -128,6 +128,7 @@ def find(rule_id):
     rules = ""
     # list the rules
     iptables_list = subprocess.Popen(["iptables", "-L",
+                                      chain,
                                       "--line-numbers"],
                                      stdout=subprocess.PIPE)
     try:
