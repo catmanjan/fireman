@@ -63,7 +63,7 @@ class Iptables(object):
         args = ["iptables"]
         if self.rule_number is None:
             # append rule
-            args.extend(["-A", self.chain])
+            args.extend(["-I", self.chain, "1"])
         else:
             # insert rule
             args.extend(["-I", self.chain, str(self.rule_number)])
