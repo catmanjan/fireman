@@ -21,14 +21,14 @@ class Iptables(object):
         # iptables. This is ordered because certain arguments need to
         # be before others. Order the keys in the order the arguments
         # need to be added.
-        self.condition_conversions =
-        OrderedDict([('protocol', '-p'),
-                    ('source_port', '--sport'),
-                    ('destination_port', '--dport'),
-                    ('input_interface', '-i'),
-                    ('output_interface', '-o'),
-                    ('source_address', '-s'),
-                    ('destination_address', '-d')])
+        self.condition_conversions = OrderedDict([('protocol', '-p'),
+                                                ('source_port', '--sport'),
+                                                ('destination_port',
+                                                    '--dport'),
+                                                ('input_interface', '-i'),
+                                                ('output_interface', '-o'),
+                                                ('source_address', '-s'),
+                                                ('destination_address', '-d')])
 
         # the chain the rule is appended to (INPUT or OUTPUT)
         # set as INPUT on default
@@ -105,16 +105,19 @@ def delete_rule(rule_id):
     """
     # search for the rule using id
     rules = find(rule_id)
+    if rules is None:
+        return
     # the first column stores the rule number - filter by this
-    indexes = filter(rules, 1)
-    # for each rule with that id
-    for index in indexes:
-        try:
-            # delete that rule
-            iptables_list = subprocess.check_call(["iptables", "-D",
-                                                   "INPUT", index])
-        except subprocess.CalledProcessError:
-            print "Error when deleting rule: " + iptables_list
+    # we will only delete the first rule, since the index will change
+    # after that, and we do not expect there to be multiple rules
+    # with the same id
+    index = filter(rules, 1)[0]
+    try:
+        # delete that rule
+        iptables_list = subprocess.check_call(["iptables", "-D",
+                                               "INPUT", index])
+    except subprocess.CalledProcessError:
+        print "Error when deleting rule: " + iptables_list
 
 
 def find(rule_id):
@@ -135,7 +138,8 @@ def find(rule_id):
             stderr=subprocess.STDOUT)
         iptables_list.wait()
     except subprocess.CalledProcessError:
-        print "Error when finding rule: " + rules
+        # grep returns failure if it can't find anything
+        return None
     # split the output into a list
     return rules.splitlines()
 
