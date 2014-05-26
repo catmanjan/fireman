@@ -1,0 +1,6 @@
+#!/bin/bash
+
+hg pull
+hg update
+hg bookmark -r default master
+hg push git+ssh://git@github.com/catmanjan/fireman.git
