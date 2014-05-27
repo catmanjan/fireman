@@ -2,18 +2,17 @@
 
 import argparse
 parser = argparse.ArgumentParser(description=
-                                 """Help screen for Fireman.
-                                 Fireman is a high level management tool
+                                 """Help screen for fireman.
+                                 fireman is a high level management tool
                                  for configuring firewall rules.
                                  It uses a responsive daemon to listen for
                                  services and applies/removes rules
-                                 accordingly. Fireman has been written
-                                 in Python."""
+                                 accordingly."""
                                  )
 parser.add_argument('-v', '--version', action='version', version="""
                     release 0.1""")
 parser.add_argument('-vi', '--view', help="""View either rules or services
-                    saved in Fireman, usage: rules, services.""")
+                    saved in fireman, usage: rules, services.""")
 parser.add_argument('-as', '--addservice', help="""
                     Add a custom service, usage: -as [name]""")
 parser.add_argument('-rs', '--removeservice', help="""Removes a custom
@@ -132,30 +131,30 @@ elif args.view:
 # Below is the logic for the parsing of the control arguments.
 if (args.control == "start"):
     if (started):
-        print("Fireman is currently active.")
+        print("fireman is currently active.")
     else:
         started = True
-        print("Starting Fireman.")
+        print("Starting fireman.")
         # TODO Call matthews API to start Fireman.
 
 elif (args.control == "stop"):
     if not (started):
-        print("Fireman is not currently active.")
+        print("fireman is not currently active.")
     else:
         started = False
-        print ("Stopping Fireman.")
+        print ("Stopping fireman.")
         # TODO API call
 
 elif (args.control == "refresh"):
     if not (started):
-        print("""Fireman is not currently active
-              , please start Fireman before refreshing."""
+        print("""fireman is not currently active
+              , please start fireman before refreshing."""
               )
     else:
-        print ("Refreshing Fireman rules.")
+        print ("Refreshing fireman rules.")
         # TODO API call
 
 elif args.control:
-    # If argument is non empty and not one of the above
-    # , refer user to the usage in help.
+    # If argument is non empty and not one of the above,
+    # refer user to the usage in help.
     print("Invalid control command, please see help for usage.")

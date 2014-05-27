@@ -87,7 +87,9 @@ def start_daemon():
     
     # JM: To be replaced with a list of service names we are listening for
     programs = [ "httpd" ]
-    # JM: To be replaced with a list of matching process IDs
+    # programs = get_service_names()
+    
+    # This list seems to have to be the same length as programs
     pids = [ 0 ]
 
     _daemon_thread = threading.Thread( 
