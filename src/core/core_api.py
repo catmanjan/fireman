@@ -17,14 +17,14 @@
 """
 import sys
 import os
-import thread
+import threading
 if os.name == "posix":
     import fcntl
     import signal
     import errno
 
 import config_parser as options
-from ..services import servicelistener as daemon
+from services import servicelistener as daemon
 
 
 __all__ = [
@@ -49,13 +49,26 @@ _lock_fd = None
 
 # Whether or not we are forcing the program (ignoring locks).
 # Internal.
-_force=False;
+_force = False
 
 # Maps pipe file objects to their filenames.
 # The file is a named pipe that is used to signal events (see
 #     get_service_emitter)
 # Really, this should only ever contain one object, but why force it.
 _emitters = {}
+
+
+# TODO comment
+# Internal. Use start_daemon() and stop_daemon().
+_daemon_thread = None
+
+
+# Flag to check whether the service listener has been asked to stop
+# listening phase. If set to True during the monitor phase, the listener
+# will terminate.
+# Internal. Use start_daemon() and stop_daemon().
+_stop_daemon = True
+
 
 class LockedError(Exception):
     """Thrown whenever a function that requires the core lock is called
@@ -65,17 +78,33 @@ class LockedError(Exception):
 
 
 def start_daemon():
+    """ Start service listener daemon in it's own thread.
+    """
+    global _stop_daemon
+    if not _stop_daemon:
+        print "Daemon has already started."
+        return
+    
     # JM: To be replaced with a list of service names we are listening for
     programs = [ "httpd" ]
     # JM: To be replaced with a list of matching process IDs
     pids = [ 0 ]
 
-    thread.start_new_thread( daemon.monitor_services, ( programs, pids, ) )
+    _daemon_thread = threading.Thread( 
+        target = daemon.monitor_services, 
+        args = ( programs, pids, ) )
+    _daemon_thread.daemon = True
+    _daemon_thread.start()
+    _stop_daemon = False
 
 
 def stop_daemon():
-    # JM: To be implemented by someone
-    print "unimplemented"
+    """ Ask the daemon to stop responding to service triggers.
+    """
+    global _stop_daemon
+    _stop_daemon = True
+    
+    print "Asking daemon to stop."
 
 
 def get_lock():

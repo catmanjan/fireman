@@ -5,6 +5,7 @@ from subprocess import Popen, PIPE
 import datetime
 import time
 import sys
+import core
 
 
 def check_process_id(program):
@@ -83,40 +84,40 @@ def monitor_services(programs, PIDCache):
         PIDList.append(PIDCache[y])
         y += 1
 
-    print "Monitor Phase: "
-    while(1):
-        try:
-            x = 0
-            time.sleep(timer)
-            for program in programs:
-                # See if the process is running
-                PIDList[x] = (check_process_id(program))
-                # If value is different, state of process has changed
-                if (PIDList[x] != PIDCache[x]):
-                    # check if process has gone up
-                    if (PIDList[x] > 0):
-                        # get current time, print out results
-                        now = datetime.datetime.now()
-                        currentTime = datetime.time(now.hour, now.minute,
-                                                    now.second)
-                        print ("'" + program + "'" +
-                               " started - \n\tTime: %s \n\tPID: %s "
-                               % (currentTime, PIDList[x]))
-                        PIDCache[x] = PIDList[x]
-                    # or down
-                    else:
-                        # get current time, print out results
-                        now = datetime.datetime.now()
-                        currentTime = datetime.time(now.hour, now.minute,
-                                                    now.second)
-                        print ("'" + program + "'"
-                               + " stopped - \n\tTime: %s"
-                               % currentTime)
-                        PIDCache[x] = PIDList[x]
-                x += 1
-        except KeyboardInterrupt:
-            print "\nShutdown requested... exiting."
-            sys.exit(0)
+    print "Service listener entered monitor phase."
+
+    _stop = False
+    while(not core.core_api._stop_daemon):
+        x = 0
+        time.sleep(timer)
+        for program in programs:
+            # See if the process is running
+            PIDList[x] = (check_process_id(program))
+            # If value is different, state of process has changed
+            if (PIDList[x] != PIDCache[x]):
+                # check if process has gone up
+                if (PIDList[x] > 0):
+                    # get current time, print out results
+                    now = datetime.datetime.now()
+                    currentTime = datetime.time(now.hour, now.minute,
+                                                now.second)
+                    print ("'" + program + "'" +
+                           " started - \n\tTime: %s \n\tPID: %s "
+                           % (currentTime, PIDList[x]))
+                    PIDCache[x] = PIDList[x]
+                # or down
+                else:
+                    # get current time, print out results
+                    now = datetime.datetime.now()
+                    currentTime = datetime.time(now.hour, now.minute,
+                                                now.second)
+                    print ("'" + program + "'"
+                           + " stopped - \n\tTime: %s"
+                           % currentTime)
+                    PIDCache[x] = PIDList[x]
+            x += 1
+            
+    print "Service listener exited monitor phase."
 
 
 # JM: Replace this with a unit test or something
