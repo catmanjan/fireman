@@ -105,6 +105,9 @@ def monitor_services(programs, PIDCache):
                            " started - \n\tTime: %s \n\tPID: %s "
                            % (currentTime, PIDList[x]))
                     PIDCache[x] = PIDList[x]
+                    
+                    # TODO not sure if this is how the API is intended
+                    core.core_api.start_service(program)
                 # or down
                 else:
                     # get current time, print out results
@@ -115,6 +118,9 @@ def monitor_services(programs, PIDCache):
                            + " stopped - \n\tTime: %s"
                            % currentTime)
                     PIDCache[x] = PIDList[x]
+                    
+                    # TODO not sure if this is how the API is intended
+                    core.core_api.stop_service(program)
             x += 1
             
     print "Service listener exited monitor phase."

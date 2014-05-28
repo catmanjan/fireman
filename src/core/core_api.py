@@ -220,11 +220,13 @@ def start_service(service):
     # get all the rules associated with service from config file
     # remove them if they exist already, or check state of service
     # add rules to firewall
-    global _lock_fd
-    global _force
-    if (not _lock_fd) and (not _force):
-        raise LockedError("Core is locked. Get the lock or force it.")
-    pass
+    print "Applying rules associated with {0}.".format(service)
+    
+    #global _lock_fd
+    #global _force
+    #if (not _lock_fd) and (not _force):
+    #    raise LockedError("Core is locked. Get the lock or force it.")
+    #pass
 
 def stop_service(service):
     """Removes  all the rules associated with string:service using the
@@ -234,11 +236,13 @@ def stop_service(service):
     """
     # get all the rules associated with service from config file
     # removes rules from firewall
-    global _lock_fd
-    global _force
-    if (not _lock_fd) and (not _force):
-        raise LockedError("Core is locked. Get the lock or force it.")
-    pass
+    print "Removing rules associated with {0}.".format(service)
+    
+    #global _lock_fd
+    #global _force
+    #if (not _lock_fd) and (not _force):
+    #    raise LockedError("Core is locked. Get the lock or force it.")
+    #pass
 
 def get_service_emitter():
     """Returns a file. A byte of data will be written to

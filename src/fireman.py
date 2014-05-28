@@ -1,6 +1,8 @@
 #!/usr/bin/python
 
 import argparse
+from core import core_api as core
+
 parser = argparse.ArgumentParser(description=
                                  """Help screen for fireman.
                                  fireman is a high level management tool
@@ -135,7 +137,12 @@ if (args.control == "start"):
     else:
         started = True
         print("Starting fireman.")
-        # TODO Call matthews API to start Fireman.
+        core.start_daemon()
+    while(1):
+        try:
+            loop = 1
+        except KeyboardInterrupt:
+            sys.exit(0)
 
 elif (args.control == "stop"):
     if not (started):
@@ -143,7 +150,7 @@ elif (args.control == "stop"):
     else:
         started = False
         print ("Stopping fireman.")
-        # TODO API call
+        core.stop_daemon()
 
 elif (args.control == "refresh"):
     if not (started):
