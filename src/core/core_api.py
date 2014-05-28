@@ -9,7 +9,6 @@
      get_service_names
      start_service
      stop_service
-     stop_service
      refresh
      generate_default_conf
      add a global start/stop mechanism - what will this mean?

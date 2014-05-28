@@ -42,7 +42,7 @@ def check_process_id(program):
     if not sudoFiltered:
         return 0
 
-    # Now we have a list of the commands for each process
+    # Now we have a filtered list of the commands for each process
     # We can use this to get a more accurate output from grep
 
     # TODO: Currently only returns PID of first service in list

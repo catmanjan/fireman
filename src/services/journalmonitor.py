@@ -9,15 +9,16 @@ import sys
 
 def compile():
 
-    p1 = Popen(['gcc', '-o', 'parseJournal',
-                '-lsystemd-journal', 'parseJournal.c'])
+    p1 = Popen(['cc', '-o', 'parseJournal',
+                'parseJournal.c', '-lsystemd-journal'])
+
     p1.communicate()
     run()
 
 
 def run():
 
-    p2 = Popen(['./parseJournal'], stdout=PIPE)
+    p2 = Popen(['./parseJournal'])
     p2.communicate()
 
 compile()

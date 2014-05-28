@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <errno.h>
 
+//
+
 int main(int argc, char **argv){
   sd_journal *j;
   const void *data;
@@ -18,6 +20,7 @@ int main(int argc, char **argv){
     "_PID=1",
     //argv[1]
     "UNIT=httpd.service"
+    //"UNIT=bluetooth.service"
   };
   char newline[]="\n";
   sd_journal_open(&j,0);
@@ -27,10 +30,6 @@ int main(int argc, char **argv){
   }
 
   while(sd_journal_next(j)>0){
-	//sd_journal_get_data instead of enumerate
-  //sd_journal_enumerate_data
-
-
 
       while(sd_journal_enumerate_data(j,&data,&length)){
         write(1,data,length);
