@@ -23,8 +23,10 @@ if os.name == "posix":
     import errno
 
 import config_parser as options
+sys.path.append(".")
+sys.path.append("..")
 from services import servicelistener as daemon
-
+import services_conf
 
 __all__ = [
     "start_daemon",
@@ -68,6 +70,8 @@ _daemon_thread = None
 # Internal. Use start_daemon() and stop_daemon().
 _stop_daemon = True
 
+_service_list = None
+
 
 class LockedError(Exception):
     """Thrown whenever a function that requires the core lock is called
@@ -81,8 +85,9 @@ def start_daemon():
     """
     global _stop_daemon
     if not _stop_daemon:
-        print "Daemon has already started."
-        return
+        # Leave printing to the user's (CLI's) discretion
+        # print("Daemon has already started.")
+        return False
     
     # JM: To be replaced with a list of service names we are listening for
     programs = [ "httpd" ]
@@ -97,6 +102,7 @@ def start_daemon():
     _daemon_thread.daemon = True
     _daemon_thread.start()
     _stop_daemon = False
+    return True
 
 
 def stop_daemon():
@@ -105,7 +111,8 @@ def stop_daemon():
     global _stop_daemon
     _stop_daemon = True
     
-    print "Asking daemon to stop."
+    # Leave printing to the user's (CLI's) discretion
+    # print "Asking daemon to stop."
 
 
 def get_lock():
@@ -219,7 +226,7 @@ def start_service(service):
     # get all the rules associated with service from config file
     # remove them if they exist already, or check state of service
     # add rules to firewall
-    print "Applying rules associated with {0}.".format(service)
+    # print "Applying rules associated with {0}.".format(service)
     
     #global _lock_fd
     #global _force
@@ -235,7 +242,7 @@ def stop_service(service):
     """
     # get all the rules associated with service from config file
     # removes rules from firewall
-    print "Removing rules associated with {0}.".format(service)
+    # print "Removing rules associated with {0}.".format(service)
     
     #global _lock_fd
     #global _force
@@ -275,7 +282,7 @@ def get_service_emitter():
     # Also, emitter_dir should be owned by room.
     pipe_name = os.tempnam(emitter_dir)
     # Make pipe. Only we (root) can read and write to it.
-    os.mkfifo(pipe_name,0600)
+    os.mkfifo(pipe_name,0o600)
     # We don't want the open call to block (see fifo(7))
     try:
         fd = os.open(pipe_name,os.O_NONBLOCK|os.O_RDONLY)
@@ -370,37 +377,51 @@ def set_master_config(filename):
     global _options
     _options = options.Options(filename)
 
+def parse_services():
+    global _options
+    default = _options.get("default_services")
+    custom = _options.get("custom_services")
+    global _service_list
+    _service_list = services_conf.getServices([custom,default])
+    return _service_list
+    
+
 # Do some testing?
 if __name__ == "__main__":
-    print "We test core API."
-    config_filename = "./master.conf"
+    print("We test core API.")
+    config_filename = "../config/master.conf"
     try:
         set_master_config(config_filename)
     except IOError:
         print("Couldn't open \""+config_filename+"\". Are you root? Does"+
               " this file exist?")
-    print "Here is the config file:"
-    print _options
+    print("Here is the config file:")
+    print(str(_options))
 
     # To see if lock works, run this script twice with "lock" as the arg
     if sys.argv[1] == "lock":
-        print "Getting lock."
+        print("Getting lock.")
         get_lock()
-        print "Got lock."
+        print("Got lock.")
         while True:
             pass
 
     if sys.argv[1] == "unlock":
-        print "Getting lock."
+        print("Getting lock.")
         get_lock()
-        print "Got lock. Releasing lock."
+        print("Got lock. Releasing lock.")
         release_lock()
         while True:
             pass
 
     if sys.argv[1] == "lockpoll":
         while True:
-            print "Getting lock."
+            print("Getting lock.")
             get_lock()
-            print "Got lock. Releasing lock."
+            print("Got lock. Releasing lock.")
             release_lock()
+
+    if sys.argv[1] == "services":
+        parse_services()
+        for s in _service_list:
+            print(s)

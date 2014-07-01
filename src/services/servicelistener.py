@@ -84,7 +84,7 @@ def monitor_services(programs, PIDCache):
         PIDList.append(PIDCache[y])
         y += 1
 
-    print "Service listener entered monitor phase."
+    print("Service listener entered monitor phase.")
 
     _stop = False
     while(not core.core_api._stop_daemon):
@@ -123,7 +123,7 @@ def monitor_services(programs, PIDCache):
                     core.core_api.stop_service(program)
             x += 1
             
-    print "Service listener exited monitor phase."
+    print("Service listener exited monitor phase.")
 
 
 # JM: Replace this with a unit test or something

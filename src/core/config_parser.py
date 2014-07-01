@@ -77,8 +77,8 @@ class Options:
         """
         self.__filename = filename
         self.__options = _parse_config(self.__filename)
-        self.__repr__ = self.__options.__repr__
-        self.__str__ = self.__options.__str__
+
+    def __str__(self): return self.__options.__str__()
 
     def get(self,option):
         """Get an option from the Options object.
@@ -224,7 +224,7 @@ def _parse_config(filename):
 
 # If main, then do some testing!
 if __name__ == "__main__":
-    print "We test now."
-    print "Parsing ./master.conf"
+    print("We test now.")
+    print("Parsing ./master.conf")
     options = Options("./master.conf") 
-    print options
+    print(options)
