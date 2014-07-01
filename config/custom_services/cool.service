@@ -1,0 +1,19 @@
+{
+  "systemd_service": "httpd.service",
+  "rules": [
+    { 
+      "action":"ACCEPT",
+      "condition": {
+        "type": "portequals",
+        "value": 80
+      }
+    },
+    { 
+      "action":"DROP",
+      "condition": {
+        "type": "portequals",
+        "value": 81
+      }
+    }
+  ]
+}
