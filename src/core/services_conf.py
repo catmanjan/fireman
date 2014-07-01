@@ -30,6 +30,10 @@ def jsonError(s = None):
     else:
         raise Exception("Invalid json for services.")
 
+def jsonAssert(b,s = None):
+    if not b:
+        jsonError(s)  
+
 class Condition:
     def __init__(self,cond):
         """
@@ -115,6 +119,11 @@ class Rule:
 
 class Service:
     """Represents a service..."""
+    transports = [
+        "tcp",
+        "udp"
+    ]
+
     def __init__(self,name,jsons):
         """Turns a json string in to a Service instance"""
         # Parse json
@@ -125,6 +134,16 @@ class Service:
         # Verify more
         if not type(dic['rules']) is list:
             jsonError()
+        # And more
+        if name != "init.service" and name != "final.service":
+            jsonAssert('port' in dic and 'transport' in dic)
+            jsonAssert(type(dic['port'] is int))
+            jsonAssert(dic['transport'] in Service.transports)
+            self.port = dic['port']
+            self.transport = dic['transport']
+        else:
+            self.port = None
+            self.transport = None
         # Make rule list
         self.rules = lmap(Rule,dic['rules'])
         self.name = name 
@@ -140,8 +159,12 @@ class Service:
         if self.systemd_service:
             s = (" and I represent the systemd service: " + 
                 self.systemd_service)
-        return (("Hi I'm Service called %s%s and this are my Rules:" % 
-            (self.name,s)) + 
+        if self.port:
+            s2 = (" and I only effect traffic on port: %s" % self.port)
+        if self.transport:
+            s3 = (" and I only effect traffic on protocol: %s" % self.transport)
+        return (("Hi I'm Service called %s%s%s%s and this are my Rules:" % 
+            (self.name,s,s2,s3)) + 
                 foldl(lambda acc,r: acc + str(r),
                       "",
                       self.rules))

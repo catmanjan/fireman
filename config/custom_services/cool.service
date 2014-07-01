@@ -1,11 +1,21 @@
 {
   "systemd_service": "httpd.service",
+  "COMMENT": "If this field were not given, your service would always run. By providing it you are choosing to only have the firewall rules in place when systemd decides that your service is running.",
+
+  "port": 80,
+  "transport": "tcp",
+
+  "COMMENT": "Port 80/tcp means that only tcp segments to/from our port 80 will be checked against these rules. Requiring a port and protocol to bind a service means that it no longer matters what order we check your rules in, so they can be reordered! It also makes designing firewall rules conceptually simpler.",
+
+  "COMMENT": "Alternatively, you can add rules to the services init.service and final.service . These rules will always be checked before and after all other services respectively. This gives you back the flexibility of being able to define global rules. In this case: port, protocol, and systemd_service should not be provided. You can still specify ports and protocols to match in the the condition field of the rules object below!",
+
   "rules": [
     { 
       "action":"ACCEPT",
       "condition": {
         "type": "portequals",
-        "value": 80
+        "value": 80,
+        "COMMENT": "Note: matching on ports or protocol is probably redundant unless you are defining init.service or final.service."
       }
     },
     { 
