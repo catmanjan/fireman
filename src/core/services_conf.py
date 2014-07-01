@@ -24,8 +24,11 @@ sys.path.append(".")
 from utils.misc import lmap, foldl, fil, find
 
 # Throws an exception...
-def jsonError():
-    raise Exception("Invalid json for services.")
+def jsonError(s = None):
+    if s:
+        raise Exception("Invalid json for services: %s" % s)
+    else:
+        raise Exception("Invalid json for services.")
 
 class Condition:
     def __init__(self,cond):
@@ -40,7 +43,7 @@ class Condition:
         if not 'type' in cond:
             jsonError()
         condType = cond["type"]
-        if not type(condType) is str or len(condType) == 0:
+        if not issubclass(type(condType),basestring) or len(condType) == 0:
             jsonError()
         # We gonna reflect a bit.    
         # Get token (e.g PortCondition)    
@@ -52,6 +55,8 @@ class Condition:
         # Gotta be a Condition.
         if not issubclass(condClass,Condition):
             jsonError()
+        # Specialise dis guy.
+        self.__class__ = condClass
         # It's like subclassing with reversed roles, man.
         condClass.__init__(self,cond)
 
@@ -59,8 +64,6 @@ class Condition:
 class Portequals(Condition):
     """A specialised condition that compares port numbers."""
     def __init__(self,cond):
-        # Specialise dis guy.
-        self.__class__ = Portequals
         # Set our parameter
         if not "value" in cond:
             jsonError()
@@ -69,7 +72,6 @@ class Portequals(Condition):
             jsonError()
         self.value=value
         
-
     def __str__(self):
         return ("Port equality on port: " + str(self.value))
 
@@ -82,8 +84,8 @@ class Action:
 
     def __init__(self,act):
         # Not necessary..?
-        if not type(act) is str:
-            jsonError()
+        if not issubclass(type(act),basestring) and not type(act) is unicode:
+            jsonError("action is of type %s" % type(act))
         # Verify
         if not act in Action.validActions:
             jsonError()
