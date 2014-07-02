@@ -22,9 +22,12 @@ if os.name == "posix":
     import signal
     import errno
 
-import config_parser as options
+# God damn it. This is really bad TODO
 sys.path.append(".")
 sys.path.append("..")
+
+import config_parser as options
+from utils.misc import lmap
 from services import servicelistener as daemon
 import services_conf
 
@@ -70,8 +73,7 @@ _daemon_thread = None
 # Internal. Use start_daemon() and stop_daemon().
 _stop_daemon = True
 
-_service_list = None
-
+_service_list = None 
 
 class LockedError(Exception):
     """Thrown whenever a function that requires the core lock is called
@@ -79,7 +81,16 @@ class LockedError(Exception):
     """
     pass
 
+def locked(f):
+    def wrapper(*args,**kargs):
+        global _lock_fd
+        global _force
+        if (not _lock_fd) and (not _force):
+            raise LockedError("Core is locked. Get the lock or force it.")
+        return f(*args,**kargs)
+    return wrapper
 
+@locked
 def start_daemon():
     """ Start service listener daemon in it's own thread.
     """
@@ -104,7 +115,7 @@ def start_daemon():
     _stop_daemon = False
     return True
 
-
+@locked
 def stop_daemon():
     """ Ask the daemon to stop responding to service triggers.
     """
@@ -169,7 +180,7 @@ def get_lock():
             raise LockTimeoutError("Get lock timed out.")
         else:
             raise e
- 
+
 def release_lock():
     """Releases hold on core lock file. Throws an exception if the lock
        isn't already held. The lock will be released afterwards
@@ -202,21 +213,28 @@ def force_lock(force):
     global _force
     _force = force
 
-def get_service_names():
-    """Returns a list containing string representations of all
-       registered firewall service names (this includes registered but
-       stopped services). These names are fetched from service
-       config files.
-
-       TODO - write this once the API has been designed and data
-       storage method decided/implemented.
+@locked 
+def get_services():
+    """Returns a list of all services. Services class is defined in services_conf.py. Should I rearrange this? 
+       Parses services on first time.
     """
-    global _lock_fd
-    global _force
-    if (not _lock_fd) and (not _force):
-        raise LockedError("Core is locked. Get the lock or force it.")
-    pass 
+    global _service_list
+    if not _service_list:
+        global _options
+        default = _options.get("default_services")
+        custom = _options.get("custom_services")
+        _service_list = services_conf.getServices([custom,default])
+    return _service_list
 
+def get_service_names():
+    """Returns a list containing pairs of the form (name,service),
+       where name is the name of the service (to be passed to start_service
+       and service is the systemd service it is bound to (such as httpd.service).
+    """
+    return lmap(lambda s: (s.name,s.systemd_service),get_services())
+    #return lmap(lambda s: (s.name,s.systemd_service),get_services())
+
+@locked
 def start_service(service):
     """Adds all the rules associated with string:service using the
        underlying firewall software.
@@ -232,8 +250,9 @@ def start_service(service):
     #global _force
     #if (not _lock_fd) and (not _force):
     #    raise LockedError("Core is locked. Get the lock or force it.")
-    #pass
+    pass
 
+@locked
 def stop_service(service):
     """Removes  all the rules associated with string:service using the
        underlying firewall software.
@@ -243,13 +262,9 @@ def stop_service(service):
     # get all the rules associated with service from config file
     # removes rules from firewall
     # print "Removing rules associated with {0}.".format(service)
-    
-    #global _lock_fd
-    #global _force
-    #if (not _lock_fd) and (not _force):
-    #    raise LockedError("Core is locked. Get the lock or force it.")
-    #pass
+    pass
 
+@locked
 def get_service_emitter():
     """Returns a file. A byte of data will be written to
        this file whenever a new service is defined, or a service
@@ -267,11 +282,7 @@ def get_service_emitter():
        Also, a file object (or fd) is more useful, especially when
        following an event driven model.
     """
-    global _lock_fd
-    global _force
     global _emitters
-    if (not _lock_fd) and (not _force):
-        raise LockedError("Core is locked. Get the lock or force it.")
     # We will be using a named pipe. Deny non-posix environments.
     if os.name != 'posix':
         raise EnvironmentError("File locking requires a posix environment.")
@@ -308,6 +319,7 @@ def get_service_emitter():
     _emitters[f] = pipe_name 
     return pipe_name
 
+@locked
 def drop_service_emitter(fileobject):
     """fileobject must be a file returned by get_service_emitter.
        Closes fileobject, and cleans up (unlinks the FIFO)
@@ -322,7 +334,7 @@ def drop_service_emitter(fileobject):
         raise
     os.unlink(pipe_name)
     
-
+@locked
 def refresh():
     """Clears all rules from firewall. Reparses configuration file to
        and reincludes all the rules.
@@ -333,6 +345,7 @@ def refresh():
         raise LockedError("Core is locked. Get the lock or force it.")
     pass
 
+@locked
 def generate_default_conf():
     """Imports all the scripts in default_conf_scripts directory
        (defined in master configuration file). Runs each import's
@@ -356,10 +369,6 @@ def generate_default_conf():
        It is not recommended to edit the rules in place, as they will b
        destroyed if generate_default_conf() is called again.
     """
-    global _lock_fd
-    global _force
-    if (not _lock_fd) and (not _force):
-        raise LockedError("Core is locked. Get the lock or force it.")
     pass
 
 def set_master_config(filename):
@@ -376,15 +385,6 @@ def set_master_config(filename):
     """
     global _options
     _options = options.Options(filename)
-
-def parse_services():
-    global _options
-    default = _options.get("default_services")
-    custom = _options.get("custom_services")
-    global _service_list
-    _service_list = services_conf.getServices([custom,default])
-    return _service_list
-    
 
 # Do some testing?
 if __name__ == "__main__":
@@ -421,7 +421,10 @@ if __name__ == "__main__":
             print("Got lock. Releasing lock.")
             release_lock()
 
+
     if sys.argv[1] == "services":
-        parse_services()
-        for s in _service_list:
+        get_lock()
+        for s in get_services():
             print(s)
+        print(get_service_names())
+        release_lock()
