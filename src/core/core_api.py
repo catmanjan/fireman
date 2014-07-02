@@ -244,12 +244,6 @@ def start_service(service):
     # get all the rules associated with service from config file
     # remove them if they exist already, or check state of service
     # add rules to firewall
-    # print "Applying rules associated with {0}.".format(service)
-    
-    #global _lock_fd
-    #global _force
-    #if (not _lock_fd) and (not _force):
-    #    raise LockedError("Core is locked. Get the lock or force it.")
     pass
 
 @locked
