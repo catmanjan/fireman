@@ -273,8 +273,7 @@ def get_service_emitter():
        underlying pipe, instead of opening it for the user. However,
        opening it has some complications that should be hidden.
 
-       Also, a file object (or fd) is more useful, especially when
-       following an event driven model.
+       A file object is returned NOT a file descriptor.
     """
     global _emitters
     # We will be using a named pipe. Deny non-posix environments.
