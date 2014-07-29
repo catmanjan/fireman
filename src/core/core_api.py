@@ -108,7 +108,7 @@ def start_daemon():
     pids = [ 0 ]
 
     _daemon_thread = threading.Thread( 
-        target = daemon.monitor_services, 
+        target = daemon.monitor_services,
         args = ( programs, pids, ) )
     _daemon_thread.daemon = True
     _daemon_thread.start()

@@ -5,6 +5,7 @@ from subprocess import Popen, PIPE
 import datetime
 import time
 import sys
+sys.path.append("..")
 import core
 
 

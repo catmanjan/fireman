@@ -5,6 +5,11 @@ from subprocess import Popen, PIPE
 import datetime
 import time
 import sys
+sys.path.append("..")
+import core
+
+programs = []           #"bluetooth", "httpd"
+PIDCache = []           #0, 0
 
 def check_process_id(program):
     # JM: isn't PID 0 a valid PID? May need to make this return -1 in the event
@@ -67,7 +72,6 @@ def check_process_id(program):
     PID = head[:-1]
     return PID
 
-
 class Daemon():
     def __init__(self):
         self.stdin_path = '/dev/null'
@@ -77,26 +81,9 @@ class Daemon():
         self.pidfile_timeout = 5
 
     def run(self):
-        # Provide initial report of
-        #    the state of input processes
-        # Local declarations
-        programs = ["bluetooth", "httpd"]
-        # programs = sys.argv     # list of args - process names
-        # programs.pop(0)         # remove the first arg (program name)
-        PIDCache = [0, 0]           # list for PIDs
 
         while(1):
             x = 0                   # simple counter
-
-            # print "Starting... Exit with '^C'"
-
-            # Check for arguments
-            # if not programs:
-            #    print "Error: No args given."
-            #    print "Usage: 'python service_listener arg1 arg2 ...'"
-            #    sys.exit(1)
-
-            # print "Initial Report: "
             for program in programs:
                 # See if the process is running
                 PIDCache[x] = check_process_id(program)
@@ -109,7 +96,20 @@ class Daemon():
 
             time.sleep(5)
 
+def runDaemon(programList, PIDs):
 
-daemonApp = Daemon()
-daemon_runner = runner.DaemonRunner(daemonApp)
-daemon_runner.do_action()
+    global programs
+    global PIDCache
+    programs = programList
+    PIDCache = PIDs
+
+    daemonApp = Daemon()
+    daemon_runner = runner.DaemonRunner(daemonApp)
+    daemon_runner.do_action()
+
+def Initialise():
+    programList = ["bluetooth", "httpd"]
+    PIDs = ["0", "0"]
+    runDaemon(programList, PIDs)
+
+Initialise()
