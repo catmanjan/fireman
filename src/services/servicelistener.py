@@ -10,10 +10,9 @@ import core
 
 
 def check_process_id(program):
-    # JM: isn't PID 0 a valid PID? May need to make this return -1 in the event
-    # of an error
     """ Check if an input program is running if it is, return PID, 
-        if not, return 0
+        if not, return -1
+        (String) -> int
     """
     # Uses the Popen functionality to simulate terminal commands
     # 'ps aux' returns a list of running daemons
@@ -41,7 +40,7 @@ def check_process_id(program):
 
     # if the list is empty, return 0
     if not sudoFiltered:
-        return 0
+        return -1
 
     # Now we have a filtered list of the commands for each process
     # We can use this to get a more accurate output from grep
@@ -76,14 +75,12 @@ def check_process_id(program):
 def monitor_services(programs, PIDCache):
     """ Provide an update every time
         a process goes up or down
+        programs is a list of program names
+        PIDCache is a list of processIDs corresponding to programs
+        ([String], [int]) -> None
     """
-    y = 0
-    timer = 3       # Wait time before checking for changes
-    PIDList = []    # Temp list for PID updates
-    # Populate the list
-    for elements in PIDCache:
-        PIDList.append(PIDCache[y])
-        y += 1
+    timer = 3                 # Wait time before checking for changes
+    PIDList = list(PIDCache)  # Temp list for PID updates
 
     print("Service listener entered monitor phase.")
 

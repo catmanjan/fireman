@@ -57,6 +57,7 @@ class Iptables(object):
 
     def add_rule(self):
         """ Add Iptables rule to iptables
+            Raises a CalledProcessError when iptables fails
             (Iptables) -> None
         """
         # args will store arguments for iptables
@@ -101,6 +102,8 @@ class Iptables(object):
 def delete_rule(rule_id, chain="INPUT"):
     """ Delete an iptables rule using the rule_id stored in the
         comments of the rule
+        Raises a CalledProcessError when iptables fails
+        Raises a ValueError when rule_id is not found in iptables
         (str) -> None
     """
     # search for the rule using id
@@ -123,6 +126,7 @@ def delete_rule(rule_id, chain="INPUT"):
 def find(rule_id, chain="INPUT"):
     """ Find an iptables rule using the rule_id stored in the comments
         of the rule
+        Raises a CalledProcessError when grep or iptables fails
         (str) -> str
     """
     rules = ""
@@ -150,6 +154,7 @@ def find(rule_id, chain="INPUT"):
 
 def filter(rules, column_index):
     """ Filter rules by specified column index
+        Raises a CalledProcessError when awk fails
         ([str], int) -> [str]
     """
     fields = []
