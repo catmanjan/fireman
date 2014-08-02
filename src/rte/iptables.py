@@ -98,7 +98,7 @@ class Iptables(object):
         delete_rule(self.rule_id, self.chain)
 
 
-def delete_rule(rule_id, chain=""):
+def delete_rule(rule_id, chain="INPUT"):
     """ Delete an iptables rule using the rule_id stored in the
         comments of the rule
         (str) -> None
@@ -120,7 +120,7 @@ def delete_rule(rule_id, chain=""):
         raise
 
 
-def find(rule_id, chain=""):
+def find(rule_id, chain="INPUT"):
     """ Find an iptables rule using the rule_id stored in the comments
         of the rule
         (str) -> str
@@ -138,9 +138,12 @@ def find(rule_id, chain=""):
             stdin=iptables_list.stdout,
             stderr=subprocess.STDOUT)
         iptables_list.wait()
-    except subprocess.CalledProcessError:
-        # grep returns failure if it can't find anything
-        return None
+    except subprocess.CalledProcessError as e:
+        if (e.returncode == 1):
+            # grep returns failure if it can't find anything
+            return None
+        else:
+            raise
     # split the output into a list
     return rules.splitlines()
 
