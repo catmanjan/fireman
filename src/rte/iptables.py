@@ -87,8 +87,8 @@ class Iptables(object):
         # will call iptables to add rules
         try:
             iptables_list = subprocess.check_call(args)
-        except subprocess.CalledProcessError:
-            print "error"
+        except subprocess.CalledProcessError as e:
+            raise
 
     def delete_rule(self):
         """ Delete the current rule
@@ -114,10 +114,10 @@ def delete_rule(rule_id, chain=""):
     index = filter(rules, 1)[0]
     try:
         # delete that rule
-        iptables_list = subprocess.check_call(["iptables", "-D",
+        msg = subprocess.check_call(["iptables", "-D",
                                                "INPUT", index])
     except subprocess.CalledProcessError:
-        print "Error when deleting rule: " + iptables_list
+        raise
 
 
 def find(rule_id, chain=""):
@@ -164,5 +164,5 @@ def filter(rules, column_index):
             # remove unnecessary whitespace
             fields.append(field.strip())
         except subprocess.CalledProcessError:
-            print "Error when filtering rules: " + field
+            raise
     return fields
