@@ -106,7 +106,7 @@ def delete_rule(rule_id, chain="INPUT"):
     # search for the rule using id
     rules = find(rule_id, chain)
     if rules is None:
-        return
+        raise ValueError("rule id: " + rule_id + " not found")
     # the first column stores the rule number - filter by this
     # we will only delete the first rule, since the index will change
     # after that, and we do not expect there to be multiple rules
