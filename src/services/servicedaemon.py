@@ -5,17 +5,21 @@ from subprocess import Popen, PIPE
 import datetime
 import time
 import sys
+
+# Bad, but works for now. Sets path in order to import core
 sys.path.append("..")
 import core
 
-programs = []           #"bluetooth", "httpd"
-PIDCache = []           #0, 0
+# programs is a list of the process names to track
+# PIDCache is a list of the process IDs associated with these processes
+programs = []
+PIDCache = []
+
 
 def check_process_id(program):
-    # JM: isn't PID 0 a valid PID? May need to make this return -1 in the event
-    # of an error
-    """ Check if an input program is running if it is, return PID, 
-        if not, return 0
+
+    """ Check if an input program is running if it is, return PID,
+        if not, return -1
     """
     # Uses the Popen functionality to simulate terminal commands
     # 'ps aux' returns a list of running daemons
@@ -43,7 +47,7 @@ def check_process_id(program):
 
     # if the list is empty, return 0
     if not sudoFiltered:
-        return 0
+        return -1
 
     # Now we have a filtered list of the commands for each process
     # We can use this to get a more accurate output from grep
@@ -72,6 +76,7 @@ def check_process_id(program):
     PID = head[:-1]
     return PID
 
+
 class Daemon():
     def __init__(self):
         self.stdin_path = '/dev/null'
@@ -81,35 +86,74 @@ class Daemon():
         self.pidfile_timeout = 5
 
     def run(self):
+        timer = 1                 # Wait time before checking for changes
+        PIDList = list(PIDCache)  # Temp list for PID updates
 
-        while(1):
-            x = 0                   # simple counter
+        # tell core that the daemon has started
+        _stop = False
+        while(not core.core_api._stop_daemon):
+            x = 0
+            time.sleep(timer)
             for program in programs:
                 # See if the process is running
-                PIDCache[x] = check_process_id(program)
-                # If 0 is returned, process not active.
-                if (PIDCache[x] == 0):
-                    print ("'" + program + "'" + " not currently active.")
-                else:
-                    print ("'" + program + "'" + " process ID is: " + PIDCache[x])
+                PIDList[x] = (check_process_id(program))
+                # If value is different, state of process has changed
+                if (PIDList[x] != PIDCache[x]):
+                    # check if process has gone up
+                    if (PIDList[x] > 0):
+                        # get current time to write to log file
+                        now = datetime.datetime.now()
+                        currentTime = datetime.time(now.hour, now.minute,
+                                                    now.second)
+
+                        # Prints to be replaced by log file script
+                        # print ("'" + program + "'" +
+                        #        " started - \n\tTime: %s \n\tPID: %s "
+                        #        % (currentTime, PIDList[x]))
+                        PIDCache[x] = PIDList[x]
+
+                        # TODO not sure if this is how the API is intended
+                        core.core_api.start_service(program)
+                    # or down
+                    elif (PIDList[x] != -1):
+                        # get current time to write to log file
+                        now = datetime.datetime.now()
+                        currentTime = datetime.time(now.hour, now.minute,
+                                                    now.second)
+                        # Prints to be replaced by log file script
+                        # print ("'" + program + "'"
+                        #        + " stopped - \n\tTime: %s"
+                        #        % currentTime)
+                        PIDCache[x] = PIDList[x]
+                        # TODO not sure if this is how the API is intended
+                        core.core_api.stop_service(program)
                 x += 1
 
-            time.sleep(5)
 
 def runDaemon(programList, PIDs):
 
+    """ Started by core to provide updates on specific processed going up and down.
+        'programLists' is a list of the process names
+        'PIDs' is a list of the process IDs associated with
+        these names (-1 if not running)
+        ([String], [int]) -> None
+    """
+    # Set global variables to input variables to enable use in daemon
     global programs
     global PIDCache
     programs = programList
     PIDCache = PIDs
 
+    # Start the daemon
     daemonApp = Daemon()
     daemon_runner = runner.DaemonRunner(daemonApp)
     daemon_runner.do_action()
 
-def Initialise():
-    programList = ["bluetooth", "httpd"]
-    PIDs = ["0", "0"]
-    runDaemon(programList, PIDs)
 
-Initialise()
+# Used for testing - needs calls to core commented out to function
+# def Initialise():
+#    programList = ["bluetooth"]
+#    PIDs = ["-1"]
+#    runDaemon(programList, PIDs)
+
+# Initialise()

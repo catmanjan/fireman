@@ -28,7 +28,9 @@ sys.path.append("..")
 
 import config_parser as options
 from utils.misc import lmap
-from services import servicelistener as daemon
+# NOTE: servicedaemon has superseded servicelistener
+# start_daemon has been updated accordingly
+from services import servicedaemon as daemon
 import services_conf
 
 __all__ = [
@@ -105,10 +107,10 @@ def start_daemon():
     # programs = get_service_names()
     
     # This list seems to have to be the same length as programs
-    pids = [ 0 ]
+    pids = [ -1 ]
 
     _daemon_thread = threading.Thread( 
-        target = daemon.monitor_services,
+        target = daemon.runDaemon,
         args = ( programs, pids, ) )
     _daemon_thread.daemon = True
     _daemon_thread.start()
