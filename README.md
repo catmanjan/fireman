@@ -4,8 +4,13 @@
 
 fireman
 =======
-
 python based responsive firewall manager
+
+build
+-----
+```
+python fireman.py
+```
 
 dependencies
 ------------
