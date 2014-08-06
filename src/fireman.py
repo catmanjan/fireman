@@ -51,7 +51,7 @@ started = False
 if (args.removeservice is not None):
     check_rm = args.removeservice
     check_rm_lower = check_rm.lower()
-    service_list = ["default_service"]  # TODO API call for a list of services
+    service_list = core.get_services()
 # First check for any services with the same service
 # name you are trying to add, check for lower or uppercase variants.
     if (any(check_rm_lower == val.lower() for val in service_list)):
@@ -69,7 +69,7 @@ if (args.removeservice is not None):
 if (args.addservice is not None):
     check = args.addservice
     check_lower = check.lower()
-    service_list = ["default_service"]  # TODO API call for a list of services
+    service_list = core.get_services()
     # First check for any services with the same service name you are trying
     # to add, check for lower or uppercase variants.
     if (any(check_lower == val.lower() for val in service_list)):
@@ -98,8 +98,7 @@ temp_action = args.action
 if (args.removerule is not None):
     temp = args.removerule[0]
     temp_id = args.removerule[1]
-    service_list = ["default_service"]
-    # TODO call API function for a list of services ^^^ on line above.
+    service_list = core.get_services()
     # First stage is to check if the service name even exists.
     temp_lower = temp.lower()
     if (any(temp_lower == val.lower() for val in service_list)):
@@ -133,16 +132,13 @@ elif args.view:
 # Below is the logic for the parsing of the control arguments.
 if (args.control == "start"):
     if (started):
-        print("fireman is currently active.")
+        print("Fireman is currently active.")
     else:
         started = True
         print("Starting fireman.")
+        core.get_lock()
         core.start_daemon()
-    while(1):
-        try:
-            loop = 1
-        except KeyboardInterrupt:
-            sys.exit(0)
+        core.release_lock()
 
 elif (args.control == "stop"):
     if not (started):
@@ -150,7 +146,9 @@ elif (args.control == "stop"):
     else:
         started = False
         print ("Stopping fireman.")
+        core.get_lock()
         core.stop_daemon()
+        core.release_lock()
 
 elif (args.control == "refresh"):
     if not (started):
