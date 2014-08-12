@@ -134,8 +134,11 @@ if (args.control == "start"):
     if (started):
         print("Fireman is currently active.")
     else:
-        started = True
+        started = True 
+        # I need a function from someone (maybe Jack) 
+        # that can tell me if the service has started or not.
         print("Starting fireman.")
+        core.set_master_config("core/master.conf")
         core.get_lock()
         core.start_daemon()
         core.release_lock()
