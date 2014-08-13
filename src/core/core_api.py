@@ -261,6 +261,12 @@ def stop_service(service):
     pass
 
 @locked
+def apply_rule(rule):
+	# apply firewall rule (primarily for network stuff)
+	# TODO send stuff to RTE
+	pass
+	
+@locked
 def get_service_emitter():
     """Returns a file. A byte of data will be written to
        this file whenever a new service is defined, or a service
