@@ -1,3 +1,4 @@
+#!/bin/python2
 """
 This file is run as a daemon. It accepts requests for rule changes over
 SSL (two party authentication). These are pushed to the server's firewall
@@ -15,6 +16,7 @@ def SSLListener(certFile,keyFile,authorisedUserDir=None):
     """Returns a listening socket that accepts ssl/tcp/ipv4
     """
     s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     myssl = ssl.wrap_socket(s,
                             keyfile=keyFile,
                             certfile=certFile,
