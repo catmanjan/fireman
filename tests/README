@@ -1,0 +1,1 @@
+These tests are a work in progress, most will not work until their functionality. ie the service adding and removing + have to wait for the daemon to start working again.
