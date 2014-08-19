@@ -1,4 +1,5 @@
-# https://pypi.python.org/pypi/python-daemon/
+# Dependencies: 
+# yum install python-daemon
 
 from daemon import runner
 from subprocess import Popen, PIPE
@@ -7,8 +8,9 @@ import time
 import sys
 
 # Bad, but works for now. Sets path in order to import core
+sys.path.append(".")
 sys.path.append("..")
-import core
+# from ..core import core_api
 
 # programs is a list of the process names to track
 # PIDCache is a list of the process IDs associated with these processes
@@ -91,7 +93,7 @@ class Daemon():
 
         # tell core that the daemon has started
         _stop = False
-        while(not core.core_api._stop_daemon):
+        while(not core_api._stop_daemon):
             x = 0
             time.sleep(timer)
             for program in programs:
@@ -151,9 +153,9 @@ def runDaemon(programList, PIDs):
 
 
 # Used for testing - needs calls to core commented out to function
-# def Initialise():
-#    programList = ["bluetooth"]
-#    PIDs = ["-1"]
-#    runDaemon(programList, PIDs)
+def Initialise():
+   programList = ["bluetooth"]
+   PIDs = ["-1"]
+   runDaemon(programList, PIDs)
 
-# Initialise()
+Initialise()
