@@ -1,7 +1,10 @@
 #!/usr/bin/python
 
 import argparse
+import logging
 from core import core_api as core
+
+logging.basicConfig(filename='fireman.log',level=logging.DEBUG)
 
 parser = argparse.ArgumentParser(description=
                                  """Help screen for fireman.

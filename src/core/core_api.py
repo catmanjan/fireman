@@ -17,6 +17,7 @@
 import sys
 import os
 import threading
+import logging
 if os.name == "posix":
     import fcntl
     import signal
@@ -36,6 +37,8 @@ import services_conf
 __all__ = [
     "start_daemon",
     "stop_daemon",
+    "start_remote_daemon",
+    "stop_remote_daemon",
     "get_lock",
     "release_lock",
     "force_lock",
@@ -63,11 +66,13 @@ _force = False
 # Really, this should only ever contain one object, but why force it.
 _emitters = {}
 
-
-# TODO comment
+# Service listener daemon object.
 # Internal. Use start_daemon() and stop_daemon().
 _daemon_thread = None
 
+# Remote service listener daemon object.
+# Internal. Use start_remote_daemon() and stop_remote_daemon().
+_remote_daemon_thread = None
 
 # Flag to check whether the service listener has been asked to stop
 # listening phase. If set to True during the monitor phase, the listener
@@ -75,6 +80,13 @@ _daemon_thread = None
 # Internal. Use start_daemon() and stop_daemon().
 _stop_daemon = True
 
+# Flag to check whether the remote service listener has been asked to 
+# stop listening. If set to True during the monitor phase, the 
+# remote listener will terminate.
+# Internal. Use start_daemon() and stop_daemon().
+_stop_remote_daemon = True
+
+# JM: What is this?
 _service_list = None 
 
 class LockedError(Exception):
@@ -96,18 +108,18 @@ def locked(f):
 def start_daemon():
     """ Start service listener daemon in it's own thread.
     """
+    logging.debug("Starting daemon...")
+    
     global _stop_daemon
     if not _stop_daemon:
-        # Leave printing to the user's (CLI's) discretion
-        # print("Daemon has already started.")
+        logging.debug("Daemon has already started!")
         return False
     
-    # JM: To be replaced with a list of service names we are listening for
-    programs = [ "httpd" ]
-    # programs = get_service_names()
+    programs = get_service_names()
     
-    # This list seems to have to be the same length as programs
-    pids = [ -1 ]
+    # JM: This list seems to have to be the same length as programs
+    # Need to confirm with Jack what this is meant to be...
+    pids = [ -1 ] * len(programs)
 
     _daemon_thread = threading.Thread( 
         target = daemon.runDaemon,
@@ -116,18 +128,43 @@ def start_daemon():
     _daemon_thread.start()
     _stop_daemon = False
     return True
-
+    
 @locked
 def stop_daemon():
-    """ Ask the daemon to stop responding to service triggers.
+    """ Ask service listener daemon to stop responding to service triggers.
     """
+    logging.debug("Stopping daemon...")
+    
     global _stop_daemon
     _stop_daemon = True
+
+@locked
+def start_remote_daemon():
+    """ Start a remote service listener daemon.
+    """
+    logging.debug("Starting network daemon...")
     
-    # Leave printing to the user's (CLI's) discretion
-    # print "Asking daemon to stop."
+    global _stop_remote_daemon
+    if not _stop_remote_daemon:
+        logging.debug("Network daemon has already started!")
+        return False
+    
+    _network_daemon_thread = threading.Thread( 
+        target = daemon.runDaemon)
+    _network_daemon_thread.daemon = True
+    _network_daemon_thread.start()
+    _stop_remote_daemon = False
+    return True
 
+@locked
+def stop_remote_daemon():
+    """ Request running remote service daemon to stop.
+    """
+    logging.debug("Stopping network daemon...")
 
+    global _stop_remote_daemon
+    _stop_remote_daemon = True
+    
 def get_lock():
     """Attempts to wait and hold the core lock file. This is probably
        /var/www/fireman/lock, but can be set in the master
@@ -234,7 +271,6 @@ def get_service_names():
        and service is the systemd service it is bound to (such as httpd.service).
     """
     return lmap(lambda s: (s.name,s.systemd_service),get_services())
-    #return lmap(lambda s: (s.name,s.systemd_service),get_services())
 
 @locked
 def start_service(service):
@@ -262,10 +298,10 @@ def stop_service(service):
 
 @locked
 def apply_rule(rule):
-	# apply firewall rule (primarily for network stuff)
-	# TODO send stuff to RTE
-	pass
-	
+    # apply firewall rule (primarily for network stuff)
+    # TODO send stuff to RTE
+    pass
+    
 @locked
 def get_service_emitter():
     """Returns a file. A byte of data will be written to
