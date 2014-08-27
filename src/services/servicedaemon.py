@@ -20,9 +20,7 @@ PIDCache = []
 # Set true to stop daemon at next chance
 _stop_daemon = False
 
-
 def check_process_id(program):
-
     """ Check if an input program is running if it is, return PID,
         if not, return -1
     """
@@ -136,7 +134,6 @@ class Daemon():
 
 
 def runDaemon(programList, PIDs):
-
     """ Started by core to provide updates on specific processed going up and down.
         'programLists' is a list of the process names
         'PIDs' is a list of the process IDs associated with
@@ -156,9 +153,10 @@ def runDaemon(programList, PIDs):
 
 
 # Used for testing - needs calls to core commented out to function
-def Initialise():
+def main():
    programList = ["bluetooth"]
    PIDs = ["-1"]
    runDaemon(programList, PIDs)
 
-Initialise()
+if __name__ == '__main__':
+    main()

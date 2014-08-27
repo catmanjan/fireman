@@ -71,6 +71,64 @@ _stop_daemon = True
 # Internal. Use start_daemon() and stop_daemon().
 _stop_remote_daemon = True
 
+def start_daemon():
+    """ Start service listener daemon in it's own thread.
+    """
+    logging.debug("Starting daemon...")
+    
+    global _stop_daemon
+    if not _stop_daemon:
+        logging.debug("Daemon has already started!")
+        return False
+    
+    programs = core.get_service_names()
+    
+    # JM: This list seems to have to be the same length as programs
+    # Need to confirm with Jack what this is meant to be...
+    pids = [ -1 ] * len(programs)
+
+    _daemon_thread = threading.Thread( 
+        target = daemon.runDaemon,
+        args = ( programs, pids, ) )
+    _daemon_thread.daemon = True
+    _daemon_thread.start()
+    _daemon_thread._stop_daemon = True
+    _stop_daemon = False
+    return True
+
+def stop_daemon():
+    """ Ask service listener daemon to stop responding to service triggers.
+    """
+    logging.debug("Stopping daemon...")
+    
+    global _stop_daemon
+    _stop_daemon = True
+
+def start_remote_daemon():
+    """ Start a remote service listener daemon.
+    """
+    logging.debug("Starting network daemon...")
+    
+    global _stop_remote_daemon
+    if not _stop_remote_daemon:
+        logging.debug("Network daemon has already started!")
+        return False
+    
+    _network_daemon_thread = threading.Thread( 
+        target = daemon.runDaemon)
+    _network_daemon_thread.daemon = True
+    _network_daemon_thread.start()
+    _stop_remote_daemon = False
+    return True
+
+def stop_remote_daemon():
+    """ Request running remote service daemon to stop.
+    """
+    logging.debug("Stopping network daemon...")
+
+    global _stop_remote_daemon
+    _stop_remote_daemon = True
+
 # Below is the parsing logic for removing a service.
 if (args.removeservice is not None):
     check_rm = args.removeservice
@@ -190,61 +248,3 @@ elif args.control:
     # If argument is non empty and not one of the above,
     # refer user to the usage in help.
     print("Invalid control command, please see help for usage.")
-
-def start_daemon():
-    """ Start service listener daemon in it's own thread.
-    """
-    logging.debug("Starting daemon...")
-    
-    global _stop_daemon
-    if not _stop_daemon:
-        logging.debug("Daemon has already started!")
-        return False
-    
-    programs = get_service_names()
-    
-    # JM: This list seems to have to be the same length as programs
-    # Need to confirm with Jack what this is meant to be...
-    pids = [ -1 ] * len(programs)
-
-    _daemon_thread = threading.Thread( 
-        target = daemon.runDaemon,
-        args = ( programs, pids, ) )
-    _daemon_thread.daemon = True
-    _daemon_thread.start()
-    _daemon_thread._stop_daemon = True
-    _stop_daemon = False
-    return True
-
-def stop_daemon():
-    """ Ask service listener daemon to stop responding to service triggers.
-    """
-    logging.debug("Stopping daemon...")
-    
-    global _stop_daemon
-    _stop_daemon = True
-
-def start_remote_daemon():
-    """ Start a remote service listener daemon.
-    """
-    logging.debug("Starting network daemon...")
-    
-    global _stop_remote_daemon
-    if not _stop_remote_daemon:
-        logging.debug("Network daemon has already started!")
-        return False
-    
-    _network_daemon_thread = threading.Thread( 
-        target = daemon.runDaemon)
-    _network_daemon_thread.daemon = True
-    _network_daemon_thread.start()
-    _stop_remote_daemon = False
-    return True
-
-def stop_remote_daemon():
-    """ Request running remote service daemon to stop.
-    """
-    logging.debug("Stopping network daemon...")
-
-    global _stop_remote_daemon
-    _stop_remote_daemon = True
