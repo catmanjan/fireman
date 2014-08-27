@@ -10,16 +10,17 @@ import sys
 # Bad, but works for now. Sets path in order to import core
 sys.path.append(".")
 sys.path.append("..")
-# from ..core import core_api
+from core import core_api
 
 # programs is a list of the process names to track
-# PIDCache is a list of the process IDs associated with these processes
+# PIDCache is a list of the process Ipython callDs associated with these processes
 programs = []
 PIDCache = []
 
+# Set true to stop daemon at next chance
+_stop_daemon = False
 
 def check_process_id(program):
-
     """ Check if an input program is running if it is, return PID,
         if not, return -1
     """
@@ -93,7 +94,7 @@ class Daemon():
 
         # tell core that the daemon has started
         _stop = False
-        while(not core_api._stop_daemon):
+        while(not _stop_daemon):
             x = 0
             time.sleep(timer)
             for program in programs:
@@ -133,7 +134,6 @@ class Daemon():
 
 
 def runDaemon(programList, PIDs):
-
     """ Started by core to provide updates on specific processed going up and down.
         'programLists' is a list of the process names
         'PIDs' is a list of the process IDs associated with
@@ -153,9 +153,10 @@ def runDaemon(programList, PIDs):
 
 
 # Used for testing - needs calls to core commented out to function
-def Initialise():
+def main():
    programList = ["bluetooth"]
    PIDs = ["-1"]
    runDaemon(programList, PIDs)
 
-Initialise()
+if __name__ == '__main__':
+    main()

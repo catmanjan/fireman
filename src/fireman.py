@@ -3,6 +3,7 @@
 import argparse
 import logging
 from core import core_api as core
+from services import servicedaemon as daemon
 
 logging.basicConfig(filename='fireman.log',level=logging.DEBUG)
 
@@ -49,6 +50,84 @@ args = parser.parse_args()
 # This variable is just a placeholder for now. I am waiting on an API call
 # by Matthew to check if Fireman is applying any rules to iptables or not.
 started = False
+
+# Service listener daemon object.
+# Internal. Use start_daemon() and stop_daemon().
+_daemon_thread = None
+
+# Remote service listener daemon object.
+# Internal. Use start_remote_daemon() and stop_remote_daemon().
+_remote_daemon_thread = None
+
+# Flag to check whether the service listener has been asked to stop
+# listening phase. If set to True during the monitor phase, the listener
+# will terminate.
+# Internal. Use start_daemon() and stop_daemon().
+_stop_daemon = True
+
+# Flag to check whether the remote service listener has been asked to 
+# stop listening. If set to True during the monitor phase, the 
+# remote listener will terminate.
+# Internal. Use start_daemon() and stop_daemon().
+_stop_remote_daemon = True
+
+def start_daemon():
+    """ Start service listener daemon in it's own thread.
+    """
+    logging.debug("Starting daemon...")
+    
+    global _stop_daemon
+    if not _stop_daemon:
+        logging.debug("Daemon has already started!")
+        return False
+    
+    programs = core.get_service_names()
+    
+    # JM: This list seems to have to be the same length as programs
+    # Need to confirm with Jack what this is meant to be...
+    pids = [ -1 ] * len(programs)
+
+    _daemon_thread = threading.Thread( 
+        target = daemon.runDaemon,
+        args = ( programs, pids, ) )
+    _daemon_thread.daemon = True
+    _daemon_thread.start()
+    _daemon_thread._stop_daemon = True
+    _stop_daemon = False
+    return True
+
+def stop_daemon():
+    """ Ask service listener daemon to stop responding to service triggers.
+    """
+    logging.debug("Stopping daemon...")
+    
+    global _stop_daemon
+    _stop_daemon = True
+
+def start_remote_daemon():
+    """ Start a remote service listener daemon.
+    """
+    logging.debug("Starting network daemon...")
+    
+    global _stop_remote_daemon
+    if not _stop_remote_daemon:
+        logging.debug("Network daemon has already started!")
+        return False
+    
+    _network_daemon_thread = threading.Thread( 
+        target = daemon.runDaemon)
+    _network_daemon_thread.daemon = True
+    _network_daemon_thread.start()
+    _stop_remote_daemon = False
+    return True
+
+def stop_remote_daemon():
+    """ Request running remote service daemon to stop.
+    """
+    logging.debug("Stopping network daemon...")
+
+    global _stop_remote_daemon
+    _stop_remote_daemon = True
 
 # Below is the parsing logic for removing a service.
 if (args.removeservice is not None):
@@ -133,7 +212,7 @@ elif args.view:
     print("Incorrect usage of -vi, please check usage in help -h.")
 
 # Below is the logic for the parsing of the control arguments.
-if (args.control == "start"):
+if (args.control == "start" or __name__ == "__main__"):
     if (started):
         print("Fireman is currently active.")
     else:
@@ -143,7 +222,7 @@ if (args.control == "start"):
         print("Starting fireman.")
         core.set_master_config("core/master.conf")
         core.get_lock()
-        core.start_daemon()
+        start_daemon()
         core.release_lock()
 
 elif (args.control == "stop"):
@@ -153,7 +232,7 @@ elif (args.control == "stop"):
         started = False
         print ("Stopping fireman.")
         core.get_lock()
-        core.stop_daemon()
+        stop_daemon()
         core.release_lock()
 
 elif (args.control == "refresh"):

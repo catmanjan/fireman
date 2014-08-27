@@ -29,9 +29,6 @@ sys.path.append("..")
 
 import config_parser as options
 from utils.misc import lmap
-# NOTE: servicedaemon has superseded servicelistener
-# start_daemon has been updated accordingly
-from services import servicedaemon as daemon
 import services_conf
 
 __all__ = [
@@ -66,26 +63,6 @@ _force = False
 # Really, this should only ever contain one object, but why force it.
 _emitters = {}
 
-# Service listener daemon object.
-# Internal. Use start_daemon() and stop_daemon().
-_daemon_thread = None
-
-# Remote service listener daemon object.
-# Internal. Use start_remote_daemon() and stop_remote_daemon().
-_remote_daemon_thread = None
-
-# Flag to check whether the service listener has been asked to stop
-# listening phase. If set to True during the monitor phase, the listener
-# will terminate.
-# Internal. Use start_daemon() and stop_daemon().
-_stop_daemon = True
-
-# Flag to check whether the remote service listener has been asked to 
-# stop listening. If set to True during the monitor phase, the 
-# remote listener will terminate.
-# Internal. Use start_daemon() and stop_daemon().
-_stop_remote_daemon = True
-
 # JM: What is this?
 _service_list = None 
 
@@ -103,67 +80,6 @@ def locked(f):
             raise LockedError("Core is locked. Get the lock or force it.")
         return f(*args,**kargs)
     return wrapper
-
-@locked
-def start_daemon():
-    """ Start service listener daemon in it's own thread.
-    """
-    logging.debug("Starting daemon...")
-    
-    global _stop_daemon
-    if not _stop_daemon:
-        logging.debug("Daemon has already started!")
-        return False
-    
-    programs = get_service_names()
-    
-    # JM: This list seems to have to be the same length as programs
-    # Need to confirm with Jack what this is meant to be...
-    pids = [ -1 ] * len(programs)
-
-    _daemon_thread = threading.Thread( 
-        target = daemon.runDaemon,
-        args = ( programs, pids, ) )
-    _daemon_thread.daemon = True
-    _daemon_thread.start()
-    _stop_daemon = False
-    return True
-    
-@locked
-def stop_daemon():
-    """ Ask service listener daemon to stop responding to service triggers.
-    """
-    logging.debug("Stopping daemon...")
-    
-    global _stop_daemon
-    _stop_daemon = True
-
-@locked
-def start_remote_daemon():
-    """ Start a remote service listener daemon.
-    """
-    logging.debug("Starting network daemon...")
-    
-    global _stop_remote_daemon
-    if not _stop_remote_daemon:
-        logging.debug("Network daemon has already started!")
-        return False
-    
-    _network_daemon_thread = threading.Thread( 
-        target = daemon.runDaemon)
-    _network_daemon_thread.daemon = True
-    _network_daemon_thread.start()
-    _stop_remote_daemon = False
-    return True
-
-@locked
-def stop_remote_daemon():
-    """ Request running remote service daemon to stop.
-    """
-    logging.debug("Stopping network daemon...")
-
-    global _stop_remote_daemon
-    _stop_remote_daemon = True
     
 def get_lock():
     """Attempts to wait and hold the core lock file. This is probably

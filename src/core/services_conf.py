@@ -170,12 +170,14 @@ class Service:
                       self.rules))
 
 def getDirServices(d):
+    if not os.path.exists(d):
+        raise Exception("Service directory (" + d + ") does not exist!")
+
     names = fil(lambda name: name.endswith(".service"),os.listdir(d))
     return lmap(lambda name: Service(name,open(os.path.join(d,name),'r').read()), names)
 
 def getServices(serviceDirs):
-    """
-        serviceDirs is a list of directories
+    """ serviceDirs is a list of directories
         This function parses all *.service files in these directories
         It creates a list of the service objects contained in each file
         Duplicate services are filtered out:
