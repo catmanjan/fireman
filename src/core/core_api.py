@@ -80,7 +80,7 @@ def locked(f):
             raise LockedError("Core is locked. Get the lock or force it.")
         return f(*args,**kargs)
     return wrapper
-    
+
 def get_lock():
     """Attempts to wait and hold the core lock file. This is probably
        /var/www/fireman/lock, but can be set in the master
