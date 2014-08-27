@@ -212,7 +212,7 @@ elif args.view:
     print("Incorrect usage of -vi, please check usage in help -h.")
 
 # Below is the logic for the parsing of the control arguments.
-if (args.control == "start"):
+if (args.control == "start" or __name__ == "__main__"):
     if (started):
         print("Fireman is currently active.")
     else:
