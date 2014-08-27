@@ -10,12 +10,15 @@ import sys
 # Bad, but works for now. Sets path in order to import core
 sys.path.append(".")
 sys.path.append("..")
-# from ..core import core_api
+from core import core_api
 
 # programs is a list of the process names to track
-# PIDCache is a list of the process IDs associated with these processes
+# PIDCache is a list of the process Ipython callDs associated with these processes
 programs = []
 PIDCache = []
+
+# Set true to stop daemon at next chance
+_stop_daemon = False
 
 
 def check_process_id(program):
@@ -93,7 +96,7 @@ class Daemon():
 
         # tell core that the daemon has started
         _stop = False
-        while(not core_api._stop_daemon):
+        while(not _stop_daemon):
             x = 0
             time.sleep(timer)
             for program in programs:
