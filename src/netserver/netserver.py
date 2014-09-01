@@ -29,8 +29,7 @@ def SSLListener(certFile,keyFile,authorisedUserDir=None):
     return myssl
 
 
-"""
-    print("Testing server")
+""" print("Testing server")
     if sys.argv[1] == "sslsock":
         print("making listener")
         l = SSLListener(certFile,keyFile)
@@ -42,8 +41,7 @@ def SSLListener(certFile,keyFile,authorisedUserDir=None):
         print(s.recv(1024))
 """
 class Daemon():
-    """
-        Daemon class that can be run as a daemon
+    """ Daemon class that can be run as a daemon
         This class must have the following attributes:
 
             * `stdin_path`, `stdout_path`, `stderr_path`: Filesystem
@@ -61,8 +59,7 @@ class Daemon():
               started.
     """
     def __init__(self):
-        """
-            Set up the daemons paths
+        """ Set up the daemons paths
         """
         self.stdin_path = '/dev/null'
         self.stdout_path = '/dev/tty'
@@ -71,8 +68,7 @@ class Daemon():
         self.pidfile_timeout = 5
 
     def run(self):
-        """
-            This will be invoked when the daemon is started
+        """ This will be invoked when the daemon is started
         """
         s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -89,8 +85,7 @@ class Daemon():
             ct.run()
 
 
-def runDaemon():
-
+def main():
     """ Started by core to provide updates on specific processed going up and down.
         None -> None
     """
@@ -100,4 +95,4 @@ def runDaemon():
     daemon_runner.do_action()
 
 if __name__ == "__main__":
-    runDaemon()
+    main()
