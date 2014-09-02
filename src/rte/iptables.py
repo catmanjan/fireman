@@ -2,7 +2,7 @@
     the Rule model and unique identifiers stored in comments
 """
 import subprocess
-from ..utils import objtodict
+from utils import objtodict
 from action import Action
 from chain import Chain
 from collections import OrderedDict

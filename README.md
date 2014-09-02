@@ -17,4 +17,5 @@ dependencies
 https://pypi.python.org/pypi/dicttoxml/1.3.1
 ```
 sudo yum install python-daemon
+sudo yum install python-enum
 ```

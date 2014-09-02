@@ -5,7 +5,7 @@ import iptables
 from iptables import Iptables
 import xmltodict
 import json
-from ..utils import objtodict
+from utils import objtodict
 
 
 def add_rule(rule, service_name):
@@ -51,7 +51,7 @@ def delete_rule(rule, service_name):
 
 def translate(rule, format_name):
     """ Translate the set of rules into a specified format
-        (Rule, str) -> None
+        (Rule, str) -> str
 
         Currently supports format_name "json" or "xml"
     """
