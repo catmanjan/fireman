@@ -15,7 +15,7 @@ class Rule(object):
 
     def __init__(self, id, chain, action, conditions=[]):
         """ Make a new Rule object
-            (Rule, str, Action, [Condition]) -> None
+            (Rule, str, Chain, Action, [Condition]) -> None
         """
         self.id = id
         self.chain = chain
