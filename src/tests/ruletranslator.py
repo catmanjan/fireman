@@ -4,19 +4,19 @@ import unittest
 class RuleTranslatorTests(unittest.TestCase):
 
     def setUp(self):
-        # set up...
+        print "TODO"
 
     def test_add_rule(self):
-        # asdf
+        print "TODO"
 
     def test_delete_rule_using_id(self):
-        # asdf
+        print "TODO"
 
     def test_delete_rule(self):
-        # asdf
+        print "TODO"
 
     def test_translate(self):
-        # asdf
+        print "TODO"
 
 if __name__ == '__main__':
     unittest.main()
