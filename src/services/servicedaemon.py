@@ -1,6 +1,13 @@
+<<<<<<< local
+# https://pypi.python.org/pypi/python-daemon/
+"""
+    Watches processes as they go up and down using a daemon
+"""
+=======
 # Dependencies: 
 # yum install python-daemon
 
+>>>>>>> other
 from daemon import runner
 from subprocess import Popen, PIPE
 import datetime
@@ -12,6 +19,8 @@ sys.path.append(".")
 sys.path.append("..")
 from core import core_api
 
+<<<<<<< local
+=======
 # programs is a list of the process names to track
 # PIDCache is a list of the process Ipython callDs associated with these processes
 programs = []
@@ -20,35 +29,45 @@ PIDCache = []
 # Set true to stop daemon at next chance
 _stop_daemon = False
 
+>>>>>>> other
 def check_process_id(program):
     """ Check if an input program is running if it is, return PID,
         if not, return -1
+        (String) -> int
+
+        Oliver's thoughts:
+            - no error handling
     """
     # Uses the Popen functionality to simulate terminal commands
     # 'ps aux' returns a list of running daemons
-    p1 = Popen(['ps', 'aux'], stdout=PIPE)
+    ps = Popen(['ps', 'aux'], stdout=PIPE)
     # grep the list to find the program you want
-    p2 = Popen(['grep', program], stdin=p1.stdout, stdout=PIPE)
+    grep = Popen(['grep', program], stdin=ps.stdout, stdout=PIPE)
     # Output the 11th column - in this case, the service command
-    p3 = Popen(['awk', '{print $11}'], stdin=p2.stdout, stdout=PIPE)
+    awk = Popen(['awk', '{print $11}'], stdin=grep.stdout, stdout=PIPE)
 
     # Close the unnecessary open pipes
-    p1.stdout.close()
-    p2.stdout.close()
+    grep.stdout.close()
 
     # Get the output of the last pipe, and put it in a character array
-    grepCheck = p3.communicate()[0]
+    grepCheck = awk.communicate()[0]
     # Split the character array based on the newline character
     # Put the results in a list
     # Remove the last value of the list as it will always be a blank line
     processList = grepCheck.split('\n')[:-1]
     # Filter out the processes created by
     # running this program, calling grep, and calling sudo
-    grepFiltered = [v for v in processList if not v.startswith('grep')]
-    pythonFiltered = [v for v in grepFiltered if not v.startswith('python')]
-    sudoFiltered = [v for v in pythonFiltered if not v.startswith('sudo')]
 
-    # if the list is empty, return 0
+    #grepFiltered = [v for v in processList if not v.startswith('grep')]
+    #pythonFiltered = [v for v in grepFiltered if not v.startswith('python')]
+    #sudoFiltered = [v for v in pythonFiltered if not v.startswith('sudo')]
+    
+    prefixes = ['grep', 'python', 'sudo']
+    sudoFiltered = processList
+    for prefix in prefixes:
+        sudoFiltered = [v for v in sudoFiltered if not v.startswith(prefix)]
+
+    # if the list is empty, return -1
     if not sudoFiltered:
         return -1
 
@@ -59,19 +78,18 @@ def check_process_id(program):
     #       Need to make program return PID of all services as a list
 
     # Use the list of commands to output PIDs
-    p1 = Popen(['ps', 'aux'], stdout=PIPE)
-    p2 = Popen(['grep', sudoFiltered[0]], stdin=p1.stdout, stdout=PIPE)
-    p4 = Popen(['awk', '{print $2}'], stdin=p2.stdout, stdout=PIPE)
+    grep = Popen(['grep', sudoFiltered[0]], stdin=ps.stdout, stdout=PIPE)
+    awk = Popen(['awk', '{print $2}'], stdin=grep.stdout, stdout=PIPE)
     # Just get the first value for now - will upgrade later
-    p5 = Popen(['head', '-n1'], stdin=p4.stdout, stdout=PIPE)
+    first = Popen(['head', '-n1'], stdin=awk.stdout, stdout=PIPE)
 
     # Close unused pipes
-    p1.stdout.close()
-    p2.stdout.close()
-    p4.stdout.close()
+    ps.stdout.close()
+    grep.stdout.close()
+    awk.stdout.close()
     # put the output from p5's pipe into output as a tuple
-    output = p5.communicate()
-    p5.stdout.close()
+    output = first.communicate()
+    first.stdout.close()
 
     # take just the head of the tuple
     head = output[0]
@@ -81,7 +99,30 @@ def check_process_id(program):
 
 
 class Daemon():
-    def __init__(self):
+    """
+        Daemon class that can be run as a daemon
+        This class must have the following attributes:
+
+            * `stdin_path`, `stdout_path`, `stderr_path`: Filesystem
+              paths to open and replace the existing `sys.stdin`,
+              `sys.stdout`, `sys.stderr`.
+
+            * `pidfile_path`: Absolute filesystem path to a file that
+              will be used as the PID file for the daemon. If
+              ``None``, no PID file will be used.
+
+            * `pidfile_timeout`: Used as the default acquisition
+              timeout value supplied to the runner's PID lock file.
+
+            * `run`: Callable that will be invoked when the daemon is
+              started.
+    """
+    def __init__(self, programList=[], PIDs=[]):
+        """
+            Set up the daemons paths
+        """
+        self.PIDCache = PIDs
+        self.programs = programList
         self.stdin_path = '/dev/null'
         self.stdout_path = '/dev/tty'
         self.stderr_path = '/dev/tty'
@@ -89,19 +130,22 @@ class Daemon():
         self.pidfile_timeout = 5
 
     def run(self):
+        """
+            This will be invoked when the daemon is started
+        """
         timer = 1                 # Wait time before checking for changes
-        PIDList = list(PIDCache)  # Temp list for PID updates
+        PIDList = list(self.PIDCache)  # Temp list for PID updates
 
         # tell core that the daemon has started
         _stop = False
         while(not _stop_daemon):
             x = 0
             time.sleep(timer)
-            for program in programs:
+            for program in self.programs:
                 # See if the process is running
                 PIDList[x] = (check_process_id(program))
                 # If value is different, state of process has changed
-                if (PIDList[x] != PIDCache[x]):
+                if (PIDList[x] != self.PIDCache[x]):
                     # check if process has gone up
                     if (PIDList[x] > 0):
                         # get current time to write to log file
@@ -113,7 +157,7 @@ class Daemon():
                         # print ("'" + program + "'" +
                         #        " started - \n\tTime: %s \n\tPID: %s "
                         #        % (currentTime, PIDList[x]))
-                        PIDCache[x] = PIDList[x]
+                        self.PIDCache[x] = PIDList[x]
 
                         # TODO not sure if this is how the API is intended
                         core.core_api.start_service(program)
@@ -127,11 +171,10 @@ class Daemon():
                         # print ("'" + program + "'"
                         #        + " stopped - \n\tTime: %s"
                         #        % currentTime)
-                        PIDCache[x] = PIDList[x]
+                        self.PIDCache[x] = PIDList[x]
                         # TODO not sure if this is how the API is intended
                         core.core_api.stop_service(program)
                 x += 1
-
 
 def runDaemon(programList, PIDs):
     """ Started by core to provide updates on specific processed going up and down.
@@ -140,14 +183,13 @@ def runDaemon(programList, PIDs):
         these names (-1 if not running)
         ([String], [int]) -> None
     """
-    # Set global variables to input variables to enable use in daemon
-    global programs
-    global PIDCache
+    # programs is a list of the process names to track
+    # PIDCache is a list of the process IDs associated with these processes
     programs = programList
     PIDCache = PIDs
 
     # Start the daemon
-    daemonApp = Daemon()
+    daemonApp = Daemon(programs, PIDCache)
     daemon_runner = runner.DaemonRunner(daemonApp)
     daemon_runner.do_action()
 

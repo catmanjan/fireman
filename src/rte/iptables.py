@@ -13,7 +13,7 @@ class Iptables(object):
         and deals with the interface between fireman and iptables
     """
 
-    def __init__(self, rule):
+    def __init__(self, rule, chain="INPUT"):
         """ Make a new Iptables from a Rule object.
             (Iptables, Rule) -> None
         """
@@ -32,11 +32,7 @@ class Iptables(object):
 
         # the chain the rule is appended to (INPUT or OUTPUT)
         # set as INPUT on default
-        self.chain = "INPUT"
-        if rule.chain == Chain.INPUT:
-            self.chain = "INPUT"
-        elif rule.chain == Chain.OUTPUT:
-            self.chain = "OUTPUT"
+        self.chain = chain
 
         # the action of the rule ie. what to do if the packet matches
         self.action = None
@@ -174,3 +170,21 @@ def filter(rules, column_index):
         except subprocess.CalledProcessError:
             raise
     return fields
+
+def add_chain(chain_name):
+    """ Add chain
+        (str) -> None
+    """
+    try:
+        subprocess.check_call(["iptables", "-N", chain_name])
+    except subprocess.CalledProcessError as e:
+        raise
+
+def delete_chain(chain_name):
+    """ Add chain
+        (str) -> None
+    """
+    try:
+        subprocess.check_call(["iptables", "-F", chain_name])
+    except subprocess.CalledProcessError as e:
+        raise

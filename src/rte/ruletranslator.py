@@ -8,13 +8,29 @@ import json
 from utils import objtodict
 
 
-def add_rule(rule, service_name):
+def start_service(service):
+    """
+    (Service) -> None
+    """
+    iptables.delete_chain(service.name)
+    iptables.add_chain(service.name)
+    # TODO: need to get chain into rule
+    for rule in rules:
+        add_rule(rule, service.name, "iptables")
+
+def stop_service(service):
+    """
+    (Service) -> None
+    """
+    iptables.delete_chain(service.name)
+
+def add_rule(rule, chain="INPUT", service_name):
     """ Add the rules using the specified firewall
         (Rule, str) -> None
     """
     if service_name == "iptables":
         # create specific Iptables object
-        rule = Iptables(rule)
+        rule = Iptables(rule, chain)
         # add rule to iptables
         rule.add_rule()
     else:

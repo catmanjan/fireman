@@ -13,9 +13,9 @@ class Rule(object):
          - an optional rule number to choose where to insert the rule
     """
 
-    def __init__(self, id, chain, action, conditions=[]):
+    def __init__(self, id, chain="INPUT", action, conditions=[]):
         """ Make a new Rule object
-            (Rule, str, Chain, Action, [Condition]) -> None
+            (Rule, str, str, Action, [Condition]) -> None
         """
         self.id = id
         self.chain = chain
