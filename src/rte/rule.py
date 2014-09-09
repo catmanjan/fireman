@@ -13,7 +13,7 @@ class Rule(object):
          - an optional rule number to choose where to insert the rule
     """
 
-    def __init__(self, id, chain="INPUT", action, conditions=[]):
+    def __init__(self, id, action, conditions=[], chain="INPUT"):
         """ Make a new Rule object
             (Rule, str, str, Action, [Condition]) -> None
         """
