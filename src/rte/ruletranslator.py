@@ -6,12 +6,13 @@ from iptables import Iptables
 import xmltodict
 import json
 from utils import objtodict
-
+import logging
 
 def start_service(service):
     """
     (Service) -> None
     """
+    logging.debug("started service "+service)
     iptables.delete_chain(service.name)
     iptables.add_chain(service.name)
     # TODO: need to get chain into rule
@@ -77,3 +78,4 @@ def translate(rule, format_name):
         return xmltodict.unparse(objtodict.todict(rule))
     else:
         raise ValueError("Error: " + format_name + " is not yet supported")
+
