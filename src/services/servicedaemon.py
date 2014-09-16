@@ -1,13 +1,10 @@
-<<<<<<< local
 # https://pypi.python.org/pypi/python-daemon/
 """
     Watches processes as they go up and down using a daemon
 """
-=======
 # Dependencies: 
 # yum install python-daemon
 
->>>>>>> other
 from daemon import runner
 from subprocess import Popen, PIPE
 import datetime
@@ -19,8 +16,6 @@ sys.path.append(".")
 sys.path.append("..")
 from core import core_api
 
-<<<<<<< local
-=======
 # programs is a list of the process names to track
 # PIDCache is a list of the process Ipython callDs associated with these processes
 programs = []
@@ -29,7 +24,6 @@ PIDCache = []
 # Set true to stop daemon at next chance
 _stop_daemon = False
 
->>>>>>> other
 def check_process_id(program):
     """ Check if an input program is running if it is, return PID,
         if not, return -1
