@@ -211,7 +211,7 @@ def stop_service(service):
     # get all the rules associated with service from config file
     # removes rules from firewall
     # print "Removing rules associated with {0}.".format(service)
-    pass
+    ruletranslator.stop_service(service)
 
 @locked
 def apply_rule(rule):
