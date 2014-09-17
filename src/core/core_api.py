@@ -202,7 +202,6 @@ def start_service(service):
     services = get_services()
     found_service=False
     for s in services:
-        print 's.name: '+str(s.name)+'; '+str(service)
         if s.name==service:
             if found_service:
                 # Found it twice, TODO throw exception
@@ -224,8 +223,20 @@ def stop_service(service):
     """
     # get all the rules associated with service from config file
     # removes rules from firewall
-    # print "Removing rules associated with {0}.".format(service)
-    ruletranslator.stop_service(service)
+    #print "Removing rules associated with {0}.".format(service)
+    services = get_services()
+    found_service=False
+    for s in services:
+        if s.name==service:
+            if found_service:
+                # Found it twice, TODO throw exception
+                pass
+            else:
+                ruletranslator.stop_service(s)
+                found_service=True
+    if not found_service:
+        # Not found! TODO throw exception
+        pass
 
 @locked
 def apply_rule(rule):

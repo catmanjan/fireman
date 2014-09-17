@@ -156,11 +156,11 @@ class Daemon():
                         logging.debug("%s started - \n\tTime: %s \n\tPID: %s"
                             % (program, currentTime, PIDList[x]))
                         self.PIDCache[x] = PIDList[x]
-                        print 'starting '+str(processTuples) 
+
                         # TODO not sure if this is how the API is intended
                         core_api.start_service(processTuples[0])
                     # or down
-                    elif (PIDList[x] != -1):
+                    elif (PIDList[x] == -1):
                         # get current time to write to log file
                         now = datetime.datetime.now()
                         currentTime = datetime.time(now.hour, now.minute,
@@ -170,7 +170,7 @@ class Daemon():
                             % (program, currentTime))
                         self.PIDCache[x] = PIDList[x]
                         # TODO not sure if this is how the API is intended
-                        core.core_api.stop_service(processTuples)
+                        core_api.stop_service(processTuples[0])
                 x += 1
 
 def runDaemon(programList, PIDs):

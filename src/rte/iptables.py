@@ -13,7 +13,7 @@ class Iptables(object):
         and deals with the interface between fireman and iptables
     """
 
-    def __init__(self, rule, chain="INPUT"):
+    def __init__(self, rule, chain="INPUT", protocol="tcp"):
         """ Make a new Iptables from a Rule object.
             (Iptables, Rule) -> None
         """
@@ -33,6 +33,8 @@ class Iptables(object):
         # the chain the rule is appended to (INPUT or OUTPUT)
         # set as INPUT on default
         self.chain = chain
+
+        self.protocol = protocol
 
         # the action of the rule ie. what to do if the packet matches
         self.action = str(rule.action)
@@ -61,12 +63,11 @@ class Iptables(object):
         if self.action is not None:
             # if action is specified add this
             args.extend(["-j", self.action])
-
+        
         for condition in self.conditions:
-            print 'cond: '+str(condition)+'; '+str(type(condition))
             if isinstance(condition, services_conf.Portequals):
-                args.extend(['--sport', condition.value])
-        print'ipargs '+str(args)
+                args.extend(['-p', str(self.protocol)])
+                args.extend(['--sport', str(condition.value)])
 
         """
         # convert each condition to an iptables argument

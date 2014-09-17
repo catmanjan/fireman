@@ -12,12 +12,11 @@ def start_service(service):
     """
     (Service) -> None
     """
-    print "started service "+str(service)
     iptables.delete_chain(service.name)
     iptables.add_chain(service.name)
     # TODO: need to get chain into rule
     for rule in service.rules:
-        add_rule(rule, "iptables",  service.name)
+        add_rule(rule, "iptables",  service.name, service.transport)
 
 def stop_service(service):
     """
@@ -25,13 +24,13 @@ def stop_service(service):
     """
     iptables.delete_chain(service.name)
 
-def add_rule(rule, service_name, chain="INPUT"):
+def add_rule(rule, service_name, chain="INPUT", protocol="tcp"):
     """ Add the rules using the specified firewall
         (Rule, str) -> None
     """
     if service_name == "iptables":
         # create specific Iptables object
-        rule = Iptables(rule, chain)
+        rule = Iptables(rule, chain, protocol)
         # add rule to iptables
         rule.add_rule()
     else:
