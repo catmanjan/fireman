@@ -46,6 +46,9 @@ parser.add_argument('-a', '--action', default='deny', help=
 parser.add_argument("control", nargs='?', help=
                     """Control argument, usage: start, stop or refresh"""
                     )
+parser.add_argument('--forcestart', help=
+                    """Start a service regardless of whether or not its
+                       program is running.""")
 args = parser.parse_args()
 
 # This variable is just a placeholder for now. I am waiting on an API call
@@ -178,6 +181,18 @@ temp_action = args.action
 #					associated service, ip, port, action
 # Each rule will automatically be given an ID in the core, which
 # can be looked up using the CLI. This ID is used to modify and delete rules.
+
+# Below is the parsing logic for starting a service.
+if args.forcestart is not None:
+    services=core.get_services()
+    found_service=False
+    for service in services:
+        if service.name==args.forcestart:
+            found_service=True
+            core.start_service(service)
+    if not found_service:
+        print(args.forcestart + " could not be started. Service not found.")
+        print(args.forcestart + " was started.")
 
 # Below is the parsing logic for removing a firewall rule.
 if (args.removerule is not None):
