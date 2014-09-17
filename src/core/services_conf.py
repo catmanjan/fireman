@@ -133,7 +133,10 @@ class Service:
             jsonError()
 
 	# INPUT/OUTPUT/FORWARD
-	self.table=dic.table
+        if 'table' in dic:
+	        self.table=dic['table']
+        else:
+            self.table = None
 
         # Verify more
         if not type(dic['rules']) is list:
