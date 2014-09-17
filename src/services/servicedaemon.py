@@ -123,19 +123,13 @@ class Daemon():
         self.stdin_path = '/dev/null'
         self.stdout_path = '/dev/tty'
         self.stderr_path = '/dev/tty'
-        self.pidfile_path = '/tmp/serviceListener.pid'
+        self.pidfile_path = '/tmp/firemandaemon.pid'
         self.pidfile_timeout = 5
 
     def run(self):
         """
             This will be invoked when the daemon is started
         """
-        # Write current process ID to a file for later use in shutting down
-        # or detecting an already running daemon.
-        pid = str(os.getpid())
-        pidfile = "/tmp/firemandaemon.pid"
-        file(pidfile, "w").write(pid)
-
         timer = 1                 # Wait time before checking for changes
         PIDList = list(self.PIDCache)  # Temp list for PID updates
 
