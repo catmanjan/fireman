@@ -88,13 +88,15 @@ def start_daemon():
     # Need to confirm with Jack what this is meant to be...
     pids = [ -1 ] * len(programs)
 
-    _daemon_thread = threading.Thread( 
-        target = daemon.runDaemon,
-        args = ( programs, pids, ) )
-    _daemon_thread.daemon = False
-    _daemon_thread.start()
-    _daemon_thread._stop_daemon = True
-    _stop_daemon = False
+    daemon.runDaemon(programs, pids)
+
+    #_daemon_thread = threading.Thread( 
+    #    target = daemon.runDaemon,
+    #    args = ( programs, pids, ) )
+    #_daemon_thread.daemon = False
+    #_daemon_thread.start()
+    #_daemon_thread._stop_daemon = True
+    #_stop_daemon = False
     return True
 
 def stop_daemon():

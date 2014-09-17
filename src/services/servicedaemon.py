@@ -135,7 +135,8 @@ class Daemon():
         while(not _stop_daemon):
             x = 0
             time.sleep(timer)
-            for program in self.programs:
+            for processTuples in self.programs:
+                program = processTuples[1]
                 # See if the process is running
                 PIDList[x] = (check_process_id(program))
                 # If value is different, state of process has changed
@@ -154,7 +155,7 @@ class Daemon():
                         self.PIDCache[x] = PIDList[x]
 
                         # TODO not sure if this is how the API is intended
-                        core.core_api.start_service(program)
+                        core.core_api.start_service(processTuples)
                     # or down
                     elif (PIDList[x] != -1):
                         # get current time to write to log file
@@ -167,7 +168,7 @@ class Daemon():
                         #        % currentTime)
                         self.PIDCache[x] = PIDList[x]
                         # TODO not sure if this is how the API is intended
-                        core.core_api.stop_service(program)
+                        core.core_api.stop_service(processTuples)
                 x += 1
 
 def runDaemon(programList, PIDs):
