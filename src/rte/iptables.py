@@ -6,7 +6,7 @@ from utils import objtodict
 from action import Action
 from chain import Chain
 from collections import OrderedDict
-
+from core import services_conf
 
 class Iptables(object):
     """ An Iptables which holds iptables' rule model
@@ -68,6 +68,10 @@ class Iptables(object):
             # if action is specified add this
             args.extend(["-j", self.action])
 
+        if type(condition) is Portequals:
+            args.extend(['-s', condition.value])
+
+        """
         # convert each condition to an iptables argument
         for condition in self.conditions:
             # run through each key of conversions, this is to retain
@@ -77,7 +81,7 @@ class Iptables(object):
                     args.extend([
                                 self.condition_conversions[key],
                                 str(condition[key])])
-
+        """
         # add rule id as comment
         args.extend(["-m", "comment", "--comment", self.rule_id])
 
@@ -188,3 +192,4 @@ def delete_chain(chain_name):
         subprocess.check_call(["iptables", "-F", chain_name])
     except subprocess.CalledProcessError as e:
         raise
+

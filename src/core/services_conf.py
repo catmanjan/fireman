@@ -131,6 +131,10 @@ class Service:
         # Verify json
         if not 'rules' in dic:
             jsonError()
+
+	# INPUT/OUTPUT/FORWARD
+	self.table=dic.table
+
         # Verify more
         if not type(dic['rules']) is list:
             jsonError()

@@ -30,6 +30,7 @@ sys.path.append("..")
 import config_parser as options
 from utils.misc import lmap
 import services_conf
+from rte import ruletranslator
 
 __all__ = [
     "start_daemon",
@@ -198,7 +199,7 @@ def start_service(service):
     # get all the rules associated with service from config file
     # remove them if they exist already, or check state of service
     # add rules to firewall
-    pass
+    ruletranslator.start_service(service)
 
 @locked
 def stop_service(service):
@@ -210,7 +211,7 @@ def stop_service(service):
     # get all the rules associated with service from config file
     # removes rules from firewall
     # print "Removing rules associated with {0}.".format(service)
-    pass
+    ruletranslator.stop_service(service)
 
 @locked
 def apply_rule(rule):
