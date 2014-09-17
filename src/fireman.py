@@ -73,7 +73,6 @@ def start_daemon():
     else:
         core.get_lock()
         programs = core.get_service_names()
-        core.release_lock()
 
         # JM: This list seems to have to be the same length as programs
         # Need to confirm with Jack what this is meant to be...
@@ -83,6 +82,7 @@ def start_daemon():
         print "fireman daemon started."
 
         daemon.runDaemon(programs, pids)
+        core.release_lock()
 
 def stop_daemon():
     """ Ask service listener daemon to stop responding to service triggers.
