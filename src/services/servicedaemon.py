@@ -7,9 +7,11 @@
 
 from daemon import runner
 from subprocess import Popen, PIPE
+import os
+import sys
 import datetime
 import time
-import sys
+import logging
 
 # Bad, but works for now. Sets path in order to import core
 sys.path.append(".")
@@ -127,6 +129,12 @@ class Daemon():
         """
             This will be invoked when the daemon is started
         """
+        # Write current process ID to a file for later use in shutting down
+        # or detecting an already running daemon.
+        pid = str(os.getpid())
+        pidfile = "/tmp/firemandaemon.pid"
+        file(pidfile, "w").write(pid)
+
         timer = 1                 # Wait time before checking for changes
         PIDList = list(self.PIDCache)  # Temp list for PID updates
 
@@ -149,9 +157,8 @@ class Daemon():
                                                     now.second)
 
                         # Prints to be replaced by log file script
-                        # print ("'" + program + "'" +
-                        #        " started - \n\tTime: %s \n\tPID: %s "
-                        #        % (currentTime, PIDList[x]))
+                        logging.debug("%s started - \n\tTime: %s \n\tPID: %s"
+                            % (program, currentTime, PIDList[x]))
                         self.PIDCache[x] = PIDList[x]
 
                         # TODO not sure if this is how the API is intended
@@ -163,9 +170,8 @@ class Daemon():
                         currentTime = datetime.time(now.hour, now.minute,
                                                     now.second)
                         # Prints to be replaced by log file script
-                        # print ("'" + program + "'"
-                        #        + " stopped - \n\tTime: %s"
-                        #        % currentTime)
+                        logging.debug("%s stopped - \n\tTime: %s"
+                            % (program, currentTime))
                         self.PIDCache[x] = PIDList[x]
                         # TODO not sure if this is how the API is intended
                         core.core_api.stop_service(processTuples)
