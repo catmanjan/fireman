@@ -12,6 +12,11 @@ build
 python fireman.py
 ```
 
+stretch goals
+-------------
+* Expand functionality of rule model to include other features supported by iptables, including conditional throttling, etc.
+* Enhanced network support.
+
 dependencies
 ------------
 https://pypi.python.org/pypi/dicttoxml/1.3.1

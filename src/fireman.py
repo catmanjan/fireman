@@ -63,23 +63,20 @@ _daemon_pid_file_path = "/tmp/firemandaemon.pid"
 def start_daemon():
     """ Start service listener daemon in it's own thread.
     """
-    core.set_master_config("core/master.conf")
-
     if os.path.isfile(_daemon_pid_file_path):
         with open (_daemon_pid_file_path, "r") as pid_file:
             pid = int(pid_file.read().replace('\n', ''))
             logging.debug("fireman daemon had already started! (PID %s)" % pid)
             print "fireman daemon had already started! (PID %s)" % pid
     else:
-        core.get_lock()
-        programs = core.get_service_names()
-
-        # JM: This list seems to have to be the same length as programs
-        # Need to confirm with Jack what this is meant to be...
-        pids = [ -1 ] * len(programs)
-
         logging.debug("fireman daemon started.")
         print "fireman daemon started."
+        
+        core.set_master_config("core/master.conf")
+        core.get_lock()
+        
+        programs = core.get_service_names()
+        pids = [ -1 ] * len(programs)
 
         daemon.runDaemon(programs, pids)
         core.release_lock()
@@ -87,8 +84,6 @@ def start_daemon():
 def stop_daemon():
     """ Ask service listener daemon to stop responding to service triggers.
     """
-    logging.debug("Trying to stop fireman daemon.")
-    
     # No PID file found, daemon is not running
     if not os.path.isfile(_daemon_pid_file_path):
         logging.debug("fireman daemon not started yet!")
