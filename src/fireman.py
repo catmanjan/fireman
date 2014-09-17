@@ -91,7 +91,7 @@ def start_daemon():
     _daemon_thread = threading.Thread( 
         target = daemon.runDaemon,
         args = ( programs, pids, ) )
-    _daemon_thread.daemon = True
+    _daemon_thread.daemon = False
     _daemon_thread.start()
     _daemon_thread._stop_daemon = True
     _stop_daemon = False
@@ -213,9 +213,9 @@ elif args.view:
     print("Incorrect usage of -vi, please check usage in help -h.")
 
 # Below is the logic for the parsing of the control arguments.
-if (args.control == "start" or __name__ == "__main__"):
+if (args.control == "start"):
     if (started):
-        print("Fireman is currently active.")
+        print("fireman was already started.")
     else:
         started = True 
         # I need a function from someone (maybe Jack) 
