@@ -35,19 +35,15 @@ class Iptables(object):
         self.chain = chain
 
         # the action of the rule ie. what to do if the packet matches
-        self.action = None
-        if rule.action == Action.ACCEPT:
-            self.action = "ACCEPT"
-        elif rule.action == Action.DROP:
-            self.action = "DROP"
+        self.action = str(rule.action)
 
         # matching criteria
         self.conditions = []
-        self.conditions.append(objtodict.todict(rule.condition))
+        self.conditions.append(rule.condition)
         # where to add this rule in iptables - ignored if None
         self.rule_number = None #rule.rule_number
         # unique identifier
-        self.rule_id = 'x'#rule.id
+        self.rule_id = 'id' #rule.id
 
     def add_rule(self):
         """ Add Iptables rule to iptables
@@ -67,9 +63,10 @@ class Iptables(object):
             args.extend(["-j", self.action])
         
         for condition in self.conditions:
-            if type(condition) is services_conf.Portequals:
-                args.extend(['-s', condition.value])
-
+            print 'cond: '+str(condition)+'; '+str(type(condition))
+            if isinstance(condition, services_conf.Portequals):
+                args.extend(['--sport', condition.value])
+        print'ipargs '+str(args)
         """
         # convert each condition to an iptables argument
         for condition in self.conditions:

@@ -60,6 +60,65 @@ args = parser.parse_args()
 # current one is stopped.
 _daemon_pid_file_path = "/tmp/firemandaemon.pid"
 
+def start_daemon():
+    """ Start service listener daemon in it's own thread.
+    """
+    core.set_master_config("core/master.conf")
+
+    if os.path.isfile(_daemon_pid_file_path):
+        with open (_daemon_pid_file_path, "r") as pid_file:
+            pid = int(pid_file.read().replace('\n', ''))
+            logging.debug("fireman daemon had already started! (PID %s)" % pid)
+            print "fireman daemon had already started! (PID %s)" % pid
+    else:
+        core.get_lock()
+        programs = core.get_service_names()
+
+        # JM: This list seems to have to be the same length as programs
+        # Need to confirm with Jack what this is meant to be...
+        pids = [ -1 ] * len(programs)
+
+        logging.debug("fireman daemon started.")
+        print "fireman daemon started."
+
+        daemon.runDaemon(programs, pids)
+        core.release_lock()
+
+def stop_daemon():
+    """ Ask service listener daemon to stop responding to service triggers.
+    """
+    logging.debug("Trying to stop fireman daemon.")
+    
+    # No PID file found, daemon is not running
+    if not os.path.isfile(_daemon_pid_file_path):
+        logging.debug("fireman daemon not started yet!")
+        print "fireman daemon not started yet!"
+    else:
+        # Read PID from file
+        with open (_daemon_pid_file_path, "r") as pid_file:
+            # Convert PID to int for kill
+            pid = int(pid_file.read().replace('\n', ''))
+
+            logging.debug("fireman daemon PID %s, attempting to shut down." % pid)
+            print "fireman daemon PID %s, attempting to shut down." % pid
+
+            # Send a quit signal to the daemon process
+            if pid_is_running(pid):
+                os.kill(pid, signal.SIGQUIT)
+
+            # Give the daemon time to die
+            time.sleep(1)
+
+            # Check and confirm that the process is not running, remove temp file
+            if pid_is_running(pid):
+                logging.debug("Sent quit signal to fireman daemon but it failed!")
+                print "Sent quit signal to fireman daemon but it failed!"
+            else:
+                os.unlink(_daemon_pid_file_path)
+
+                logging.debug("fireman daemon successfully shut down.")
+                print "fireman daemon successfully shut down."
+
 def pid_is_running(pid):        
     """ Check For the existence of a unix pid. """
     try:
@@ -158,63 +217,14 @@ elif args.view:
 
 # Below is the logic for the parsing of the control arguments.
 if (args.control == "start"):
-    """ Start service listener daemon in it's own thread.
-    """
-    core.set_master_config("core/master.conf")
-
-    if os.path.isfile(_daemon_pid_file_path):
-        with open (_daemon_pid_file_path, "r") as pid_file:
-            pid = int(pid_file.read().replace('\n', ''))
-            logging.debug("fireman daemon had already started! (PID %s)" % pid)
-            print "fireman daemon had already started! (PID %s)" % pid
-    else:
-        core.get_lock()
-        programs = core.get_service_names()
-        core.release_lock()
-
-        # JM: This list seems to have to be the same length as programs
-        # Need to confirm with Jack what this is meant to be...
-        pids = [ -1 ] * len(programs)
-
-        logging.debug("fireman daemon started.")
-        print "fireman daemon started."
-
-        daemon.runDaemon(programs, pids)
+    start_daemon()
 
 elif (args.control == "stop"):
-    """ Ask service listener daemon to stop responding to service triggers.
-    """
-    logging.debug("Trying to stop fireman daemon.")
-    
-    # No PID file found, daemon is not running
-    if not os.path.isfile(_daemon_pid_file_path):
-        logging.debug("fireman daemon not started yet!")
-        print "fireman daemon not started yet!"
-    else:
-        # Read PID from file
-        with open (_daemon_pid_file_path, "r") as pid_file:
-            # Convert PID to int for kill
-            pid = int(pid_file.read().replace('\n', ''))
+    stop_daemon()
 
-            logging.debug("fireman daemon PID %s, attempting to shut down." % pid)
-            print "fireman daemon PID %s, attempting to shut down." % pid
-
-            # Send a quit signal to the daemon process
-            if pid_is_running(pid):
-                os.kill(pid, signal.SIGQUIT)
-
-            # Give the daemon time to die
-            time.sleep(1)
-
-            # Check and confirm that the process is not running, remove temp file
-            if pid_is_running(pid):
-                logging.debug("Sent quit signal to fireman daemon but it failed!")
-                print "Sent quit signal to fireman daemon but it failed!"
-            else:
-                os.unlink(_daemon_pid_file_path)
-
-                logging.debug("fireman daemon successfully shut down.")
-                print "fireman daemon successfully shut down."
+elif (args.control == "restart"):
+    stop_daemon()
+    start_daemon()
 
 elif (args.control == "refresh"):
     print ("Refreshing fireman rules.")
