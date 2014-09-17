@@ -61,12 +61,13 @@ class Iptables(object):
         if self.action is not None:
             # if action is specified add this
             args.extend(["-j", self.action])
-        
+
         for condition in self.conditions:
             print 'cond: '+str(condition)+'; '+str(type(condition))
             if isinstance(condition, services_conf.Portequals):
                 args.extend(['--sport', condition.value])
         print'ipargs '+str(args)
+
         """
         # convert each condition to an iptables argument
         for condition in self.conditions:
