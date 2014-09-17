@@ -184,15 +184,8 @@ temp_action = args.action
 
 # Below is the parsing logic for starting a service.
 if args.forcestart is not None:
-    services=core.get_services()
-    found_service=False
-    for service in services:
-        if service.name==args.forcestart:
-            found_service=True
-            core.start_service(service)
-    if not found_service:
-        print(args.forcestart + " could not be started. Service not found.")
-        print(args.forcestart + " was started.")
+    # TODO catch exception!
+    core.start_service(args.forcestart)
 
 # Below is the parsing logic for removing a firewall rule.
 if (args.removerule is not None):
