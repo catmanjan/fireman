@@ -188,6 +188,7 @@ def delete_chain(chain_name):
         (str) -> None
     """
     try:
+        subprocess.check_call(["iptables", "-F", chain_name])
         subprocess.check_call(["iptables", "-X", chain_name])
     except subprocess.CalledProcessError as e:
         pass
