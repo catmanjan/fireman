@@ -308,7 +308,7 @@ hr {
 	/*position:relative;*/
   background-color: #333;
 
-	background: url(../img/bg1.jpg) no-repeat top center;
+	background: url(../img/websiteBG.jpg) no-repeat top center;
   background-size: 100%;
 }
 
@@ -346,12 +346,12 @@ hr {
 	border-width: 0px;
 	border-color: #000;
 	border-style: none;
-	text-shadow: -2px 0 1px #000;
+	text-shadow: -4px 0 1px #000;
 }
 
 .intro .slogan h4 {
 	color: #fff;
-	text-shadow: -2px 1px 1px #000;
+	text-shadow: -8px 0px 1px #000;
 }
 
 
