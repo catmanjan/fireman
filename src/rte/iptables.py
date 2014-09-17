@@ -43,13 +43,11 @@ class Iptables(object):
 
         # matching criteria
         self.conditions = []
-        for condition in rule.conditions:
-            # creates a dict of each condition
-            self.conditions.append(objtodict.todict(condition))
+        self.conditions.append(objtodict.todict(rule.condition))
         # where to add this rule in iptables - ignored if None
-        self.rule_number = rule.rule_number
+        self.rule_number = None #rule.rule_number
         # unique identifier
-        self.rule_id = rule.id
+        self.rule_id = 'x'#rule.id
 
     def add_rule(self):
         """ Add Iptables rule to iptables
@@ -67,9 +65,10 @@ class Iptables(object):
         if self.action is not None:
             # if action is specified add this
             args.extend(["-j", self.action])
-
-        if type(condition) is Portequals:
-            args.extend(['-s', condition.value])
+        
+        for condition in self.conditions:
+            if type(condition) is services_conf.Portequals:
+                args.extend(['-s', condition.value])
 
         """
         # convert each condition to an iptables argument
@@ -190,6 +189,7 @@ def delete_chain(chain_name):
     """
     try:
         subprocess.check_call(["iptables", "-F", chain_name])
+        subprocess.check_call(["iptables", "-X", chain_name])
     except subprocess.CalledProcessError as e:
-        raise
+        pass
 

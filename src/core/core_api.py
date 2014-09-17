@@ -202,6 +202,7 @@ def start_service(service):
     services = get_services()
     found_service=False
     for s in services:
+        print 's.name: '+str(s.name)+'; '+str(service)
         if s.name==service:
             if found_service:
                 # Found it twice, TODO throw exception
