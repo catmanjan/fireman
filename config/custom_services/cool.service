@@ -1,5 +1,5 @@
 {
-  "systemd_service": "httpd.service",
+  "systemd_service": "bluetooth",
   "COMMENT": "If this field were not given, your service would always run. By providing it you are choosing to only have the firewall rules in place when systemd decides that your service is running.",
 
   "COMMENT": "INPUT or OUTPUT or FORWARD or leave field null and your rules will be added to all three.",

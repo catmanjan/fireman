@@ -18,7 +18,6 @@ src/rte/ruletranslator.py
 src/services/__init__.py
 src/services/journalmonitor.py
 src/services/servicedaemon.py
-src/services/servicelistener.py
 src/utils/__init__.py
 src/utils/misc.py
 src/utils/objtodict.py

@@ -12,11 +12,11 @@ def start_service(service):
     """
     (Service) -> None
     """
-    logging.debug("started service "+service)
+    print "started service "+str(service)
     iptables.delete_chain(service.name)
     iptables.add_chain(service.name)
     # TODO: need to get chain into rule
-    for rule in rules:
+    for rule in service.rules:
         add_rule(rule, "iptables",  service.name)
 
 def stop_service(service):

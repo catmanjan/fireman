@@ -10,6 +10,7 @@ from subprocess import Popen, PIPE
 import datetime
 import time
 import sys
+import logging
 
 # Bad, but works for now. Sets path in order to import core
 sys.path.append(".")
@@ -55,7 +56,7 @@ def check_process_id(program):
     #grepFiltered = [v for v in processList if not v.startswith('grep')]
     #pythonFiltered = [v for v in grepFiltered if not v.startswith('python')]
     #sudoFiltered = [v for v in pythonFiltered if not v.startswith('sudo')]
-    
+
     prefixes = ['grep', 'python', 'sudo']
     sudoFiltered = processList
     for prefix in prefixes:
@@ -139,6 +140,7 @@ class Daemon():
                 program = processTuples[1]
                 # See if the process is running
                 PIDList[x] = (check_process_id(program))
+
                 # If value is different, state of process has changed
                 if (PIDList[x] != self.PIDCache[x]):
                     # check if process has gone up
@@ -153,9 +155,9 @@ class Daemon():
                         #        " started - \n\tTime: %s \n\tPID: %s "
                         #        % (currentTime, PIDList[x]))
                         self.PIDCache[x] = PIDList[x]
-
+                        print 'starting '+str(processTuples) 
                         # TODO not sure if this is how the API is intended
-                        core.core_api.start_service(processTuples)
+                        core_api.start_service(processTuples[0])
                     # or down
                     elif (PIDList[x] != -1):
                         # get current time to write to log file
