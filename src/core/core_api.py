@@ -30,7 +30,7 @@ sys.path.append("..")
 import config_parser as options
 from utils.misc import lmap
 import services_conf
-from rte import ruletranslator
+#from rte import ruletranslator
 
 __all__ = [
     "start_daemon",
@@ -207,7 +207,7 @@ def start_service(service):
                 # Found it twice, TODO throw exception
                 pass
             else:
-                ruletranslator.start_service(s)
+                #ruletranslator.start_service(s)
                 found_service=True
     if not found_service:
         # Not found! TODO throw exception
@@ -232,7 +232,7 @@ def stop_service(service):
                 # Found it twice, TODO throw exception
                 pass
             else:
-                ruletranslator.stop_service(s)
+                #ruletranslator.stop_service(s)
                 found_service=True
     if not found_service:
         # Not found! TODO throw exception
@@ -269,7 +269,7 @@ def get_service_emitter():
     emitter_dir = _options.get("emitter_dir")
     # os.tempnam can be vulnerable to symlink attack.
     # It is okay to use with named pipes though.
-    # Also, emitter_dir should be owned by room.
+    # Also, emitter_dir should be owned by root.
     pipe_name = os.tempnam(emitter_dir)
     # Make pipe. Only we (root) can read and write to it.
     os.mkfifo(pipe_name,0o600)
