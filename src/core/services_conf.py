@@ -47,7 +47,7 @@ class Condition:
         if not 'type' in cond:
             jsonError()
         condType = cond["type"]
-        if not issubclass(type(condType),basestring) or len(condType) == 0:
+        if not type(condType) is unicode or len(condType) == 0:
             jsonError()
         # We gonna reflect a bit.    
         # Get token (e.g PortCondition)    
@@ -88,7 +88,7 @@ class Action:
 
     def __init__(self,act):
         # Not necessary..?
-        if not issubclass(type(act),basestring) and not type(act) is unicode:
+        if not type(act) is unicode:
             jsonError("action is of type %s" % type(act))
         # Verify
         if not act in Action.validActions:

@@ -264,49 +264,51 @@ def get_service_emitter():
     global _emitters
     # We will be using a named pipe. Deny non-posix environments.
     if os.name != 'posix':
-        raise EnvironmentError("File locking requires a posix environment.")
+        raise EnvironmentError("Named pipes require a posix environment.")
     # Get the directory our emitters (named pipes) are to be stored.
     emitter_dir = _options.get("emitter_dir")
-    # os.tempnam can be vulnerable to symlink attack.
-    # It is okay to use with named pipes though.
-    # Also, emitter_dir should be owned by root.
-    pipe_name = os.tempnam(emitter_dir)
-    # Make pipe. Only we (root) can read and write to it.
-    os.mkfifo(pipe_name,0o600)
-    # We don't want the open call to block (see fifo(7))
+    made_pipe=False
+    fileno=0
+    filename=""
+    # This logic could be improved by getting a directory listing.
+    while not made_pipe:
+        try:
+            filename=os.path.join(emitter_dir,str(fileno))
+            os.mkfifo(filename,0o600)
+            made_pipe=True
+        except OSError as e:
+            if e.errno != 17:
+                raise e
+            if fileno > 100:
+                raise Exception("Couldn't create emitter after 100 attempts.")
+            fileno=fileno+1
+
     try:
-        fd = os.open(pipe_name,os.O_NONBLOCK|os.O_RDONLY)
+        fd = os.open(filename,os.O_NONBLOCK|os.O_RDONLY)
     except:
         # Clean up, but reraise.
-        os.unlink(pipe_name)
+        os.unlink(filename)
         raise
-    # We want to return a file object, not a file descriptor.
-    try:
-        f = os.fdopen(fd)
-    except:
-        # Clean up, but reraise.
-        os.close(fd)
-        os.unlink(pipe_name)
-        raise
+
     # When the user is done, we have to be able to clean up.
     # We need to be able to associate the file with its file name.
     # Because we used os.fdopen, f.name is not set correctly.
     # So, just store it in a dictionary.
-    if f in _emitters:
+    if fd in _emitters:
         # Not sure how this would occur, but it shouldn't.
         raise Exception("File already associated with a name.")
-    _emitters[f] = pipe_name 
-    return pipe_name
+    _emitters[fd] = filename 
+    return fd 
 
 @locked
-def drop_service_emitter(fileobject):
-    """fileobject must be a file returned by get_service_emitter.
+def drop_service_emitter(fd):
+    """fd must be a file returned by get_service_emitter.
        Closes fileobject, and cleans up (unlinks the FIFO)
     """
-    pipe_name = _emitters[fileobject]
-    del _emitters[fileobject]
+    pipe_name = _emitters[fd]
+    del _emitters[fd]
     try:
-        fileobject.close()
+        os.close(fd)
     except:
         # We really want to try to unlink the file.
         os.unlink(pipe_name)
