@@ -16,6 +16,7 @@ stretch goals
 -------------
 * Expand functionality of rule model to include other features supported by iptables, including conditional throttling, etc.
 * Enhanced network support.
+* Use journal parsing instead of polling to determine service status.
 
 dependencies
 ------------

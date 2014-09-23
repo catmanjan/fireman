@@ -74,10 +74,14 @@ a:focus {
   line-height: 1em;
 }
 
-.navbar-brand h1{
+.navbar-brand h1 {
 	color: #fff;
   font-size: 20px;
   line-height: 40px;
+}
+
+.navbar-brand h1 img {
+  margin-bottom: 3px;
 }
 
 .navbar-brand:focus {
