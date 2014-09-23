@@ -85,7 +85,7 @@ a:focus {
 }
 
 .nav.navbar-nav {
-    background-color: rgba(255,255,255,.4);
+    background-color: rgba(255,255,255,.7);
 }
 
 .navbar-custom.top-nav-collapse .nav.navbar-nav {
@@ -96,7 +96,7 @@ a:focus {
 .navbar-custom ul.nav li a {
 	font-size: 12px;
 	letter-spacing: 1px;
-    color: #444;
+  color: #000;
 	text-transform: uppercase;
 	font-weight: 700;
 }
