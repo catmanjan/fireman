@@ -353,9 +353,19 @@ hr {
 	text-shadow: -4px 0 1px #000;
 }
 
-.intro .slogan h4 {
-	color: #fff;
-	text-shadow: -8px 0px 1px #000;
+.intro .subheading {
+  margin-left:30%;
+  padding-top:25px;
+  padding-bottom:1px;
+  width:40%;
+  background-color:rgba(174,167,167,0.7);
+  text-align:center;
+  border-radius:10px;
+}
+
+#subheading-text {
+  color: #000;
+  text-shadow: -4x 0px 1px #000;
 }
 
 
