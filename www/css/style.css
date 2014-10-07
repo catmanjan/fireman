@@ -321,8 +321,15 @@ hr {
 }
 
 .intro .slogan {
+  margin-top:-5%;
+  margin-bottom:2%;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 	text-align: center;
-
+  background-color: rgba(100,100,100,0.7);
+  height:40%;
+  width:70%;
 }
 
 .intro .page-scroll {
@@ -339,40 +346,28 @@ hr {
 
 /*Main Heading*/
 .intro .slogan h2 {
-  margin-top:-5%;
 	color: #FFF;
 	text-shadow: none;
-	font-size: 60px;
-	line-height: 60px;
+	font-size: 90px;
 	font-weight: 700;
 	font-family: Montserrat, sans-serif;
-	background-color: rgba(0, 0, 0, 0);
-	text-decoration: none;
 	text-transform: uppercase;
-	border-width: 0px;
-	border-color: #000;
-	border-style: none;
+  margin-bottom:-5px;
 	text-shadow: -4px 0 1px #000;
 }
 
 /*Subheading text background (opaque box)*/
 .intro .subheading {
-  margin-left: 30%;
-  padding-top: 30px;
-  padding-bottom: 1px;
-  width: 40%;
-  background-color: rgba(224,224,224,0.8);
-  text-align: center;
-  border-radius: 10px;
-  margin-bottom:2%;
-  /* Drop shadow for the opaque box?*/
-  /*box-shadow: -4px 5px 1px #999;*/
+  /*Placeholder*/
 }
 
 /*Text underneath heading*/
 #subheading-text {
-  color: #000;
-  text-shadow: -4x 0px 1px #000;
+  font-size: 20px;
+  text-align: right;
+  color: #FFF;
+  padding-right:2%;
+  text-shadow: -4px 0px 1px #000;
 }
 
 /*Download button*/
