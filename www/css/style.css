@@ -65,8 +65,9 @@ a:focus {
 }
 
 .navbar-brand {
-    font-weight: 700;
+  font-weight: 700;
 }
+
 .navbar-brand {
   height: 40px;
   padding: 5px 15px;
@@ -375,6 +376,8 @@ img.displayed {
   display: block;
   margin-left: auto;
   margin-right: auto;
+  padding-top:1%;
+  padding-bottom:1%;
 }
 
 /* ===========================
@@ -458,8 +461,9 @@ img.displayed {
 
 
 /* ===========================
---- Contact
+--- Information
 ============================ */
+
 
 form#contact-form .form-group label {
 	text-align: left !important;
