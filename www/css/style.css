@@ -458,10 +458,17 @@ img.displayed {
 	margin-bottom: 20px;
 }	
 
+/* ===========================
+--- Information
+============================ */
+
+.bigger-margin {
+  margin-bottom:3%;
+}
 
 
 /* ===========================
---- Information
+--- Contact
 ============================ */
 
 
