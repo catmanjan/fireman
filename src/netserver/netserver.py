@@ -10,10 +10,7 @@ import socket
 import ssl
 from daemon import runner
 import time
-<<<<<<< local
-=======
 import client_thread
->>>>>>> other
 
 keyFile = "priv.key"
 certFile = "cert.crt" 
@@ -73,8 +70,6 @@ class Daemon():
     def run(self):
         """ This will be invoked when the daemon is started
         """
-<<<<<<< local
-=======
         s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         myssl = ssl.wrap_socket(s,
@@ -83,16 +78,11 @@ class Daemon():
                                 server_side=True)
         myssl.bind(("localhost",7777))
         myssl.listen(64)
->>>>>>> other
+
         while True:
             #accept connections from outside
-<<<<<<< local
-            (clientsocket, address) = serversocket.accept()
-            ct = client_thread(clientsocket)
-=======
             (clientsocket, address) = s.accept()
             ct = client_thread.client_thread(clientsocket)
->>>>>>> other
             ct.run()
 
 
@@ -106,11 +96,4 @@ def main():
     daemon_runner.do_action()
 
 if __name__ == "__main__":
-<<<<<<< local
-<<<<<<< local
-    runDaemon()=======
     runDaemon()
->>>>>>> other
-=======
-    main()
->>>>>>> other
