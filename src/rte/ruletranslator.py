@@ -7,22 +7,40 @@ import xmltodict
 import json
 from utils import objtodict
 import logging
+from core import services_conf
 
 def start_service(service):
     """
     (Service) -> None
     """
-    iptables.delete_chain(service.name)
-    iptables.add_chain(service.name)
-    # TODO: need to get chain into rule
+    chain=u"fireman_service_"+service.name
+    iptables.delete_chain(chain)
+    iptables.add_chain(chain)
+    jump_rule = services_conf.Rule()
+    jump_rule.action=chain
+    my_cond = {}
+    my_cond["type"]=u"Portequals"
+    my_cond["value"]=service.port
+    jump_rule.condition=services_conf.Condition(my_cond)
+    # TODO: if service is called init or final, add at start or end
+    add_rule(jump_rule, "iptables", "INPUT", service.transport)
+    
     for rule in service.rules:
-        add_rule(rule, "iptables",  service.name, service.transport)
+        add_rule(rule, "iptables", chain, service.transport)
 
 def stop_service(service):
     """
     (Service) -> None
     """
-    iptables.delete_chain(service.name)
+    chain="fireman_service_"+service.name
+    jump_rule = services_conf.Rule()
+    jump_rule.action=chain
+    my_cond = {}
+    my_cond["type"]=u"Portequals"
+    my_cond["value"]=service.port
+    jump_rule.condition=services_conf.Condition(my_cond)
+    delete_rule(jump_rule,"iptables")
+    iptables.delete_chain(chain)
 
 def add_rule(rule, service_name, chain="INPUT", protocol="tcp"):
     """ Add the rules using the specified firewall

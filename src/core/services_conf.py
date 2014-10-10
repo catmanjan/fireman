@@ -98,8 +98,10 @@ class Action:
     def __str__(self): return self.action
     
 class Rule:
-    def __init__(self,dic):
+    def __init__(self,dic=None):
         """Turns part of a parsed json string in to a Rule"""
+        if not dic: # Make an empty Rule
+            return
         # Verify
         if not type(dic) is dict:
             jsonError()
