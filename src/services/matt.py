@@ -4,6 +4,9 @@
 # how the fuk to import?
 # get emitter isnt working. am i sure tmpname is ok to use?
 # catch all kill signals?
+# maybe each systemd service can map to multiple fireman services?
+# Filter seems to be not working? Systemd updates my file descriptor
+#   even when filtered actions occur. Its fault. Wasting resources.
 
 import systemd.journal as journal
 import logging
@@ -14,11 +17,18 @@ import sys
 sys.path.append("core")
 import core_api as core
 
-
+# Systemd journal object
 global j
+# Mapping from systemd service names to fireman service names 
 global services
+services = {} 
+# File descriptor to select journal changes
 global journal_fd
+# File descriptor to select core changes
 global core_fd
+# Maps systemd service names to status
+global service_statuses
+service_statuses = {}
 
 
 def update_services():
@@ -55,6 +65,7 @@ def startup():
     core_fd = core.get_service_emitter()
     core.release_lock()
     journal_fd = j.fileno()
+    read_journal()
 
 def cleanup():
     global j
@@ -62,6 +73,50 @@ def cleanup():
     core.drop_service_emitter(core_fd)
     core.release_lock()
     j.close()
+
+def read_journal():
+    global j
+    global services
+    global core_fd
+    global journal_fd
+    j.process()
+    if(services != {}):
+        new_service_statuses = {}
+        for entry in j:
+            if entry['UNIT'] in services:
+                m = entry['MESSAGE']
+                logging.debug("Got journal message: " + m)
+                # Is this good? What if their output format changes?
+                action = m.split(None,1)
+                if action[0] in ["Starting","Started",
+                                 "Stopping","Stopped"]:
+                    new_service_statuses[entry['UNIT']] = action[0] 
+                    logging.debug("It's a " + action[0] + " message.")
+                else:
+                    logging.debug("Unknown message: " + entry['MESSAGE'])                        
+            else:
+                logging.debug("This shouldn't happen. Does it matter?")
+        # We stored all changes. Now we check if we need to update.
+        # This handles multiple changes well.
+        core.get_lock()
+        for s in new_service_statuses:
+            status = new_service_statuses[s]
+            if s in service_statuses:
+                # Previous status of this service
+                s_old = service_statuses[s]
+            else:
+                s_old = None
+            if((status in ["Starting","Started"])
+               and (s_old in ["Stopping","Stopped",None])):
+                logging.debug("Asking core to start " + services[s])
+                core.start_service(services[s])
+            elif((status in ["Stopping","Stopped"])
+               and (s_old in ["Starting","Started",None])):
+                logging.debug("Asking core to stop " + services[s])
+                core.stop_service(services[s])
+            # Update the status
+            service_statuses[s] = status
+        core.release_lock()
 
 def body():
     global j
@@ -82,30 +137,7 @@ def body():
         # Process journal
         if r == journal_fd:
             logging.debug("New journal entries!")
-            j.process()
-            if(services != {}):
-                for entry in j:
-                    if entry['UNIT'] in services:
-                        m = entry['MESSAGE']
-                        logging.debug("Got journal message: " + m)
-                        # Is this good? What if their output format changes?
-                        action = m.split(None,1)
-                        if action[0] == "Starting":
-                            logging.debug("It's a starting message.")
-                        elif action[0] == "Started":
-                            logging.debug("It's a started message.")
-                            core.start_service(services[entry['UNIT']])
-                        elif action[0] == "Stopping":
-                            logging.debug("It's a stopping message.")
-                        elif action[0] == "Stopped":
-                            logging.debug("It's a stopped message.")
-                            core.stop_service(services[entry['UNIT']])
-                        else:
-                            logging.debug("Unknown message.")
-                        
-                    else:
-                        logging.debug("This shouldn't happen. Does it matter?")
-
+            read_journal()
         # Check for core changes
         if r == core_fd:
             logging.debug("New services!")

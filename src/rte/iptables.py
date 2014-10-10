@@ -3,8 +3,6 @@
 """
 import subprocess
 from utils import objtodict
-from action import Action
-from chain import Chain
 from collections import OrderedDict
 from core import services_conf
 

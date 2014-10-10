@@ -30,7 +30,7 @@ sys.path.append("..")
 import config_parser as options
 from utils.misc import lmap
 import services_conf
-#from rte import ruletranslator
+from rte import ruletranslator
 
 __all__ = [
     "start_daemon",
@@ -207,7 +207,7 @@ def start_service(service):
                 # Found it twice, TODO throw exception
                 pass
             else:
-                #ruletranslator.start_service(s)
+                ruletranslator.start_service(s)
                 found_service=True
     if not found_service:
         # Not found! TODO throw exception
@@ -232,7 +232,7 @@ def stop_service(service):
                 # Found it twice, TODO throw exception
                 pass
             else:
-                #ruletranslator.stop_service(s)
+                ruletranslator.stop_service(s)
                 found_service=True
     if not found_service:
         # Not found! TODO throw exception
