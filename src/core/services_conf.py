@@ -9,6 +9,8 @@ It is intended to abstract away how these are stored on the filesystem.
 STATE:nearly complete
 TODO:write subclasses for each condition type
      test
+     class definitions should appear in separate more central file, esp now that
+         rte is using these classes
 CONSIDERATIONS:
   how should it look?
 """

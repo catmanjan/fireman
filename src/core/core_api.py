@@ -12,6 +12,8 @@
      refresh
      generate_default_conf
      add a global start/stop mechanism - what will this mean?
+     does all functionality exist? such as dynamically adding/removing rules
+     config generating scripts should be written, AT LEAST ONE as proof of concept
    CONSIDERATIONS:fireman/doc/core_notes
 """
 import sys
