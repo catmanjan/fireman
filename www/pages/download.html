@@ -11,7 +11,7 @@
 
     <title>Fireman - Download</title>
 
-    <!-- Bootstrap Core CSS -->
+    <!-- Bootstrap Core CSS-->
     <link href="css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Custom CSS -->
@@ -19,11 +19,14 @@
 
 </head>
 
-<body>
+<body background="../img/SidebarBG.png">
+
+    <a href="https://github.com/you"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
 
     <div id="wrapper">
 
         <!-- Sidebar -->
+
         <div id="sidebar-wrapper">
             <ul class="sidebar-nav">
                 <li class="sidebar-brand">
@@ -37,6 +40,12 @@
                 </li>
                 <li>
                     <a href="documentation.html">Documentation</a>
+                <li>
+                    <a href="readme.html">Read Me</a>
+                </li>
+                <li>
+                    <a href="license.html">License</a>
+                </li>
             </ul>
         </div>
         <!-- /#sidebar-wrapper -->
@@ -46,11 +55,21 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-lg-12">
-                        <h1>Fireman Download</h1>
-                        <p>This page will have the download information. </p>
-                        <p>Need to keep all page content within the <code>#page-content-wrapper</code>.</p>
-                        <p>Also there's a cool menu toggle button</p>
-                        <a href="#menu-toggle" class="btn btn-default" id="menu-toggle">Toggle Menu</a>
+                        <div class="toggle-to-left">
+                            <a href="#menu-toggle" class="btn btn-default" id="menu-toggle">Toggle Menu</a>
+                        </div>
+                        <div class="body-text">
+                            <h1>Download Fireman</h1>
+                            <br>
+                            <p>The Fireman Project is freely available to the public for use and modification.</p>
+                            <p>To clone the Fireman Repository, visit our <a href="https://github.com/catmanjan/fireman">
+                               <ins><b>GitHub</b></ins></a> page.</p>
+                            <p>Otherwise, download the Fireman RPM Package: </p>
+                            <a href=""><img src="../img/download.png" alt="Download Now"></a>
+                            <p><br>For instructions on how to use Fireman, to view the dependencies required, and for all other information, please see the <a href="documentation.html"><ins><b>Documentation</b></ins></a> page.</p>
+                            <p>Fireman is an open source project, licensed under GNU GPL v2. To view Fireman Licensing, please see our <a href="license.html"><ins><b>License</b></ins></a> page.</p>
+                            
+                        </div>
                     </div>
                 </div>
             </div>
