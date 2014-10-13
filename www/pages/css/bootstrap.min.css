@@ -22,6 +22,13 @@ body {
 .col-lg-12 h1 {
 	color:white;
 }
+.col-lg-12 h3 {
+	color:#428bca;
+}
+.col-lg-12 code {
+	color:#428bca;
+	background:#000000;
+}
 .toggle-to-left {
 	float:left;
 	width:0%;
@@ -38,4 +45,14 @@ body {
 .body-text-license dl {
 	font-size:17px;
 	color:white;
+}
+.body-text-documentation {
+	width:60%;
+	margin: 0 auto;	
+}
+.depend-link a {
+	color:white;
+}
+.depend-link a:hover {
+	color:#808080;
 }
