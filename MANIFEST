@@ -8,8 +8,6 @@ src/core/core_api.py
 src/core/master.conf
 src/core/services_conf.py
 src/rte/__init__.py
-src/rte/action.py
-src/rte/chain.py
 src/rte/condition.py
 src/rte/iptables.py
 src/rte/iptables_exception.py
@@ -17,6 +15,7 @@ src/rte/rule.py
 src/rte/ruletranslator.py
 src/services/__init__.py
 src/services/journalmonitor.py
+src/services/matt.py
 src/services/servicedaemon.py
 src/utils/__init__.py
 src/utils/misc.py

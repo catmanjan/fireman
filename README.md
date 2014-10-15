@@ -20,9 +20,15 @@ stretch goals
 
 dependencies
 ------------
-https://pypi.python.org/pypi/dicttoxml/1.3.1
-https://pypi.python.org/pypi/xmltodict/0.9.0
+* https://pypi.python.org/pypi/dicttoxml/1.3.1
+* https://pypi.python.org/pypi/xmltodict/0.9.0
 ```
 sudo yum install python-daemon
 sudo yum install python-enum
+```
+
+For building RPM package with setup.py:
+```
+sudo yum install @development-tools
+sudo yum install fedora-packager
 ```
