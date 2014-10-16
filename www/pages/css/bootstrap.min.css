@@ -38,6 +38,9 @@ body {
 	width:45%;
 	margin: 0 auto;
 }
+.body-text li {
+	color:white;
+}
 .body-text-license {
 	width:60%;
 	margin: 0 auto;
