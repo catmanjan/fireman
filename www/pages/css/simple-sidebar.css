@@ -92,6 +92,7 @@
 }
 
 .sidebar-nav > .sidebar-brand {
+    margin-left:-10px;
     height: 65px;
     font-size: 18px;
     line-height: 60px;
