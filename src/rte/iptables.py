@@ -45,6 +45,9 @@ class Iptables(object):
         # unique identifier
         self.rule_id = 'id' #rule.id
 
+        if self.chain == "final.service" or self.chain == "init.service":
+            add_jump_rule(self.chain)
+
     def add_rule(self):
         """ Add Iptables rule to iptables
             Raises a CalledProcessError when iptables fails
@@ -67,17 +70,6 @@ class Iptables(object):
                 args.extend(['-p', str(self.protocol)])
                 args.extend(['--sport', str(condition.value)])
 
-        """
-        # convert each condition to an iptables argument
-        for condition in self.conditions:
-            # run through each key of conversions, this is to retain
-            # ordering
-            for key in self.condition_conversions:
-                if key in condition:
-                    args.extend([
-                                self.condition_conversions[key],
-                                str(condition[key])])
-        """
         # add rule id as comment
         args.extend(["-m", "comment", "--comment", self.rule_id])
 
@@ -86,6 +78,28 @@ class Iptables(object):
             iptables_list = subprocess.check_call(args)
         except subprocess.CalledProcessError as e:
             raise
+
+    def add_jump_rule(chain):
+        """ Add Iptables rule to iptables
+            Raises a CalledProcessError when iptables fails
+            (Iptables) -> None
+        """
+        # args will store arguments for iptables
+        args = ["iptables"]
+        if chain == "final":
+            # append rule
+            args.extend(["-A", "INPUT"])
+        if chain == "init":
+            # preprend rule
+            args.extend(["-I", "INPUT", "1"])
+        args.extend(["-j", chain])
+        
+        # will call iptables to add rules
+        try:
+            iptables_list = subprocess.check_call(args)
+        except subprocess.CalledProcessError as e:
+            raise
+
 
     def delete_rule(self):
         """ Delete the current rule
