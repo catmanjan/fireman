@@ -69,9 +69,12 @@ def startup():
 
 def cleanup():
     global j
-    core.get_lock()
-    core.drop_service_emitter(core_fd)
-    core.release_lock()
+    try:
+        core.get_lock()
+        core.drop_service_emitter(core_fd)
+        core.release_lock()
+    except:
+        pass
     j.close()
 
 def read_journal():

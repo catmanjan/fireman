@@ -12,7 +12,7 @@
      refresh
      generate_default_conf
      add a global start/stop mechanism - what will this mean?
-     does all functionality exist? such as dynamically adding/removing rules
+     does all functionality exist? such as dynamically adding/removing services
      config generating scripts should be written, AT LEAST ONE as proof of concept
    CONSIDERATIONS:fireman/doc/core_notes
 """
@@ -337,6 +337,8 @@ def refresh():
        and reincludes all the rules.
 
        TODO IMPLEMENT
+
+       WARNING: firewall will be down momentarily
     """
     global _lock_fd
     global _force
@@ -371,6 +373,9 @@ def generate_default_conf():
        TODO: generate should probably return a service object which we can
        turn to text ourselves. This requires writing marshalling methods that
        we don't have time to make now though.
+
+       TODO: should also have some way of specifying arguments to these
+       scripts, such as a configuration file location.
     """
     global _options
     logging.debug("Generating default services.")
@@ -383,7 +388,7 @@ def generate_default_conf():
         mypath = os.path.join(sdir,script)
         myglobals = {}
         mylocals = {}
-        execfile(mypath,myglobals,mylocals)
+        execfile(mypath,globals(),mylocals)
         service_text = mylocals["generate"]()
         name = script[:-3]
         f = open(os.path.join(servicedir,name + ".service"),"w")
@@ -392,9 +397,7 @@ def generate_default_conf():
     # The running services have probably changed, so notify everyone.
     # TODO test that the service listener is responding to this!
     notify_all()
-
         
-
 def set_master_config(filename):
     """Sets the core to use filename as its master configuration file.
        This file is parsed and the options will be used by other core
