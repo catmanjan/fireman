@@ -133,8 +133,9 @@ class Service:
         # Parse json
         dic = json.loads(jsons)
         # Verify json
-        if not 'rules' in dic:
-            jsonError()
+        # Do we need rules?
+#        if not 'rules' in dic:
+#            jsonError()
 
 	# INPUT/OUTPUT/FORWARD
         if 'table' in dic:
@@ -143,8 +144,8 @@ class Service:
             self.table = None
 
         # Verify more
-        if not type(dic['rules']) is list:
-            jsonError()
+       # if not type(dic['rules']) is list:
+       #     jsonError()
         # And more
         if name != "init.service" and name != "final.service":
             jsonAssert('port' in dic and 'transport' in dic)
@@ -156,7 +157,8 @@ class Service:
             self.port = None
             self.transport = None
         # Make rule list
-        self.rules = lmap(Rule,dic['rules'])
+        if 'rules' in dic and type(dic['rules']) is list:
+            self.rules = lmap(Rule,dic['rules'])
         self.name = name 
 
         # Systemd service name this is associated with

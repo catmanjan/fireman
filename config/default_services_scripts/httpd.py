@@ -32,17 +32,10 @@ def generate():
     # TODO
     # This is pretty crappy. We should have a way to marshal service objects.
     # Also match on ip address if it is present in httpd configuration
-    return """
-{
-    "COMMENT": "This is an automatically generated service file."
-    "systemd_service": "httpd.service"
+    return """{
+    "COMMENT": "This is an automatically generated service file.",
+    "systemd_service": "httpd.service",
     "port": """ + port + """,
-    "transport": "tcp",
-    
-    "rules": [
-        {
-            "action":"ACCEPT"
-        }
-    ]
+    "transport": "tcp"
 }
 """

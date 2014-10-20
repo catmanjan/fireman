@@ -13,7 +13,7 @@ def start_service(service):
     """
     (Service) -> None
     """
-    chain=u"fireman_service_"+service.name
+    chain=u"fm_"+service.name
     iptables.delete_chain(chain)
     iptables.add_chain(chain)
     jump_rule = services_conf.Rule()
@@ -24,15 +24,17 @@ def start_service(service):
     jump_rule.condition=services_conf.Condition(my_cond)
     # TODO: if service is called init or final, add at start or end
     add_rule(jump_rule, "iptables", "INPUT", service.transport)
-    
-    for rule in service.rules:
-        add_rule(rule, "iptables", chain, service.transport)
+
+    # A service doesn't really need rules.
+    if hasattr(service,'rules'):    
+        for rule in service.rules:
+            add_rule(rule, "iptables", chain, service.transport)
 
 def stop_service(service):
     """
     (Service) -> None
     """
-    chain="fireman_service_"+service.name
+    chain="fm_"+service.name
     jump_rule = services_conf.Rule()
     jump_rule.action=chain
     my_cond = {}

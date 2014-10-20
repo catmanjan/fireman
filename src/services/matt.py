@@ -156,7 +156,9 @@ try:
     startup()
     while True:
         body()
-except:
+except Exception as e:
+    logging.debug("Service listener closing.")
     cleanup()
+    raise
     exit(0)
 
