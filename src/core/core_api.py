@@ -320,7 +320,10 @@ def drop_service_emitter(fd):
 
 @locked 
 def notify_all():
-    """Writes a byte of data to all listener files."""
+    """Writes a byte of data to all listener files.
+
+       TODO test this and get_emitter() and service listener work together
+    """
     global _emitters
     emitter_dir = _options.get("emitter_dir")
     for listener in os.listdir(emitter_dir):
