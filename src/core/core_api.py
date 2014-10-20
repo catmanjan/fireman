@@ -353,7 +353,7 @@ def refresh():
         Note: the listener is expected to reparse the journal to find
         the current state of all services, which it does (not tested)
     """
-    rte.remove_all()
+    rte.stop_all()
     parse_services()
     notify_all()
 

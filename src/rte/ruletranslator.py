@@ -98,3 +98,5 @@ def translate(rule, format_name):
     else:
         raise ValueError("Error: " + format_name + " is not yet supported")
 
+def stop_all():
+    iptables.delete_all_rules()
