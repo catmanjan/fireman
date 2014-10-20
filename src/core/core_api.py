@@ -307,6 +307,7 @@ def drop_service_emitter(fd):
     """fd must be a file returned by get_service_emitter.
        Closes fileobject, and cleans up (unlinks the FIFO)
     """
+    global _emitters
     pipe_name = _emitters[fd]
     del _emitters[fd]
     try:
@@ -316,11 +317,23 @@ def drop_service_emitter(fd):
         os.unlink(pipe_name)
         raise
     os.unlink(pipe_name)
+
+@locked 
+def notify_all():
+    """Writes a byte of data to all listener files."""
+    global _emitters
+    emitter_dir = _options.get("emitter_dir")
+    for listener in os.listdir(emitter_dir):
+        f = open(os.path.join(emitter_dir,listener),"w")
+        f.write(" ")
+        f.close()
     
 @locked
 def refresh():
     """Clears all rules from firewall. Reparses configuration file to
        and reincludes all the rules.
+
+       TODO IMPLEMENT
     """
     global _lock_fd
     global _force
@@ -373,6 +386,10 @@ def generate_default_conf():
         f = open(os.path.join(servicedir,name + ".service"),"w")
         f.write(service_text)
         f.close()
+    # The running services have probably changed, so notify everyone.
+    # TODO test that the service listener is responding to this!
+    notify_all()
+
         
 
 def set_master_config(filename):
