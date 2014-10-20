@@ -1,5 +1,6 @@
 #!/usr/bin/python2.7
 # TODO add error checking/doc strings
+# TODO this needs more testing, especially testing change in core state
 # figure out when to lock core
 # how the fuk to import?
 # get emitter isnt working. am i sure tmpname is ok to use?
@@ -32,12 +33,20 @@ service_statuses = {}
 
 
 def update_services():
+    """This function gets the service list from the core.
+       It should start everything with a clean slate to make sure
+       services are left in a consistent state.
+    """
     global services
+    global service_statuses
+    global journal_fd
     global j
 
     # Re-initialise
     services = {}
+    service_statuses = {}
     j = journal.Reader()
+    journal_fd = j.fileno()
     j.this_boot()
     j.this_machine()
     # Only listen to messages from init. It's trustworthy.
@@ -64,7 +73,6 @@ def startup():
     update_services()
     core_fd = core.get_service_emitter()
     core.release_lock()
-    journal_fd = j.fileno()
     read_journal()
 
 def cleanup():
@@ -150,6 +158,7 @@ def body():
                     pass
             update_services()
             core.release_lock()
+            read_journal()
 
 logging.basicConfig(level=logging.DEBUG)
 try:

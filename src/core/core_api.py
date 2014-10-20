@@ -171,6 +171,14 @@ def force_lock(force):
     global _force
     _force = force
 
+@locked
+def parse_services():
+    global _options
+    global _service_list
+    default = _options.get("default_services")
+    custom = _options.get("custom_services")
+    _service_list = services_conf.getServices([custom,default])
+
 @locked 
 def get_services():
     """Returns a list of all services. Services class is defined in services_conf.py. Should I rearrange this? 
@@ -178,10 +186,7 @@ def get_services():
     """
     global _service_list
     if not _service_list:
-        global _options
-        default = _options.get("default_services")
-        custom = _options.get("custom_services")
-        _service_list = services_conf.getServices([custom,default])
+        parse_services()
     return _service_list
 
 def get_service_names():
@@ -336,15 +341,27 @@ def refresh():
     """Clears all rules from firewall. Reparses configuration file to
        and reincludes all the rules.
 
-       TODO IMPLEMENT
+       TODO test that listener responds to refresh...
+            this means starting the listener, adding a new service file
+            refresh()ing and making sure the iptables rules appear
+            Also try removing a service file and make sure iptables rules
+            disappear
 
        WARNING: firewall will be down momentarily
+
+       Things this should do:
+            stop all services
+            reparse service files
+            notify service listener of potential changes
+            TODO: if service has no systemd name, should we just
+                start it ourselves? Is this even valid at the moment?
+
+        Note: the listener is expected to reparse the journal to find
+        the current state of all services, which it does (not tested)
     """
-    global _lock_fd
-    global _force
-    if (not _lock_fd) and (not _force):
-        raise LockedError("Core is locked. Get the lock or force it.")
-    pass
+    rte.remove_all()
+    parse_services()
+    notify_all()
 
 @locked
 def generate_default_conf():
