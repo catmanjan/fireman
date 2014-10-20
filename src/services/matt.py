@@ -149,11 +149,11 @@ def body():
             core.release_lock()
 
 logging.basicConfig(level=logging.DEBUG)
-#try:
-startup()
-while True:
-    body()
-#except:
-cleanup()
-exit(0)
+try:
+    startup()
+    while True:
+        body()
+except:
+    cleanup()
+    exit(0)
 
