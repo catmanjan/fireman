@@ -43,7 +43,7 @@ class Iptables(object):
         # where to add this rule in iptables - ignored if None
         self.rule_number = None #rule.rule_number
         # unique identifier
-        self.rule_id = 'id' #rule.id
+        self.rule_id = 'fireman' #rule.id
 
         if self.chain == "final.service" or self.chain == "init.service":
             add_jump_rule(self.chain)
@@ -131,6 +131,30 @@ def delete_rule(rule_id, chain="INPUT"):
                                                "INPUT", index])
     except subprocess.CalledProcessError:
         raise
+
+def delete_all_rules(chain="INPUT"):
+    """ Deletes all fireman related rules
+        Raises a CalledProcessError when iptables fails
+        Raises a ValueError when rule_id is not found in iptables
+        (str) -> None
+    """
+    rule_id = "fireman"
+    # search for the rule using id
+    rules = find(rule_id, chain)
+    if rules is None:
+        raise ValueError("rule id: " + rule_id + " not found")
+    # the first column stores the rule number - filter by this
+    # we will only delete the first rule, since the index will change
+    # after that, and we do not expect there to be multiple rules
+    # with the same id
+    indexes = filter(rules, 1)
+    for index in indexes:
+        try:
+            # delete that rule
+            msg = subprocess.check_call(["iptables", "-D",
+                                                   "INPUT", index])
+        except subprocess.CalledProcessError:
+            raise
 
 
 def find(rule_id, chain="INPUT"):
