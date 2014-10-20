@@ -156,12 +156,4 @@ while True:
 #except:
 cleanup()
 exit(0)
-j.add_match(UNIT="httpd.service")
 
-while True:
-    for entry in j:
-            s=entry['MESSAGE']
-            ss = s.encode('ascii','ignore')
-            print(entry['UNIT'].encode('ascii','ignore')  + ss)
-
-core.release_lock()
