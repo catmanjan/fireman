@@ -351,8 +351,29 @@ def generate_default_conf():
        directory and modified by hand, to tailor the rules to the user.
        It is not recommended to edit the rules in place, as they will b
        destroyed if generate_default_conf() is called again.
+
+       TODO: generate should probably return a service object which we can
+       turn to text ourselves. This requires writing marshalling methods that
+       we don't have time to make now though.
     """
-    pass
+    global _options
+    logging.debug("Generating default services.")
+    sdir = _options.get("default_services_scripts")
+    servicedir = _options.get("default_services")
+    for script in os.listdir(sdir):
+        if not script.endswith(".py"):
+            continue
+        logging.debug("Running script: " + script);
+        mypath = os.path.join(sdir,script)
+        myglobals = {}
+        mylocals = {}
+        execfile(mypath,myglobals,mylocals)
+        service_text = mylocals["generate"]()
+        name = script[:-3]
+        f = open(os.path.join(servicedir,name + ".service"),"w")
+        f.write(service_text)
+        f.close()
+        
 
 def set_master_config(filename):
     """Sets the core to use filename as its master configuration file.
