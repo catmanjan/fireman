@@ -1,1 +1,11 @@
 DEBUG:root:Starting daemon...
+DEBUG:root:fireman daemon started.
+DEBUG:root:fireman daemon PID 6465, attempting to shut down.
+DEBUG:root:fireman daemon successfully shut down.
+DEBUG:root:fireman daemon started.
+DEBUG:root:fireman daemon had already started! (PID 6818)
+DEBUG:root:fireman daemon PID 6818, attempting to shut down.
+DEBUG:root:fireman daemon successfully shut down.
+DEBUG:root:fireman daemon started.
+DEBUG:root:fireman daemon PID 7437, attempting to shut down.
+DEBUG:root:fireman daemon successfully shut down.
