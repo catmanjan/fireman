@@ -1,7 +1,0 @@
-#!/bin/bash
-# This is the script I use to copy changesets from the ANU mercurial repository 
-# (u5013925@partch.anu.edu.au/REDHg1/) into the GitHub repository.
-hg pull
-hg update
-hg bookmark -r default master
-hg push git+ssh://git@github.com/catmanjan/fireman.git
